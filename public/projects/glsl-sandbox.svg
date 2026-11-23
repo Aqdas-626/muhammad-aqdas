@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1600" y2="1000" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#020914"/>
+      <stop offset="0.6" stop-color="#061226"/>
+      <stop offset="1" stop-color="#01050d"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1600" height="1000" fill="url(#bg3)"/>
+
+  <!-- Top App Navigation / Toolbar -->
+  <rect x="60" y="50" width="1480" height="60" rx="14" fill="#0b1733" fill-opacity="0.8" stroke="#38bdf8" stroke-opacity="0.2"/>
+  <circle cx="95" cy="80" r="5" fill="#38bdf8"/>
+  <text x="115" y="85" fill="#ffffff" font-family="monospace" font-size="14" font-weight="600">GLSL_TERRAIN_WORKSPACE</text>
+  <rect x="1360" y="65" width="140" height="30" rx="15" fill="#38bdf8" fill-opacity="0.2" stroke="#38bdf8" stroke-opacity="0.4"/>
+  <text x="1430" y="85" fill="#38bdf8" font-family="monospace" font-size="12" text-anchor="middle">COMPILE SHADER</text>
+
+  <!-- Left Code Editor Pane -->
+  <rect x="60" y="130" width="680" height="810" rx="16" fill="#060e1f" fill-opacity="0.9" stroke="#38bdf8" stroke-opacity="0.15"/>
+  <rect x="90" y="160" width="140" height="14" rx="3" fill="#64748b" fill-opacity="0.4"/>
+  
+  <!-- Line Numbers & Code Lines -->
+  <g font-family="monospace" font-size="13" fill="#64748b">
+    <text x="85" y="210">01</text>
+    <text x="85" y="240">02</text>
+    <text x="85" y="270">03</text>
+    <text x="85" y="300">04</text>
+    <text x="85" y="330">05</text>
+    <text x="85" y="360">06</text>
+    <text x="85" y="390">07</text>
+    <text x="85" y="420">08</text>
+    <text x="85" y="450">09</text>
+    <text x="85" y="480">10</text>
+  </g>
+
+  <g font-family="monospace" font-size="13">
+    <text x="120" y="210" fill="#38bdf8">uniform float <tspan fill="#e2e8f0">u_time;</tspan></text>
+    <text x="120" y="240" fill="#38bdf8">uniform vec2 <tspan fill="#e2e8f0">u_resolution;</tspan></text>
+    <text x="120" y="270" fill="#a855f7">varying vec3 <tspan fill="#e2e8f0">v_position;</tspan></text>
+    <text x="120" y="330" fill="#60a5fa">float <tspan fill="#f1f5f9">simplexNoise</tspan><tspan fill="#94a3b8">(vec2 p) {</tspan></text>
+    <text x="145" y="360" fill="#94a3b8">return sin(p.x * 2.5 + u_time * 0.4) * cos(p.y * 2.5);</text>
+    <text x="120" y="390" fill="#94a3b8">}</text>
+    <text x="120" y="450" fill="#60a5fa">void <tspan fill="#f1f5f9">main</tspan><tspan fill="#94a3b8">() {</tspan></text>
+    <text x="145" y="480" fill="#94a3b8">vec3 pos = position + normal * simplexNoise(uv * 4.0);</text>
+    <text x="145" y="510" fill="#38bdf8">gl_Position = <tspan fill="#e2e8f0">projectionMatrix * modelViewMatrix * vec4(pos, 1.0);</tspan></text>
+    <text x="120" y="540" fill="#94a3b8">}</text>
+  </g>
+
+  <!-- Right 3D Viewport Pane (Terrain Wireframe Mesh) -->
+  <rect x="760" y="130" width="780" height="810" rx="16" fill="#040c1a" fill-opacity="0.9" stroke="#38bdf8" stroke-opacity="0.25"/>
+
+  <!-- Topographic Contour Lines -->
+  <g fill="none" stroke="#38bdf8" stroke-opacity="0.7" stroke-width="1.5">
+    <path d="M 800 680 Q 950 420 1150 560 T 1500 480"/>
+    <path d="M 800 720 Q 950 460 1150 600 T 1500 520" stroke-opacity="0.5"/>
+    <path d="M 800 760 Q 950 500 1150 640 T 1500 560" stroke-opacity="0.4"/>
+    <path d="M 800 800 Q 950 540 1150 680 T 1500 600" stroke-opacity="0.3"/>
+    <path d="M 800 840 Q 950 580 1150 720 T 1500 640" stroke-opacity="0.2"/>
+  </g>
+
+  <!-- 3D Mountain Polygonal Peaks -->
+  <polygon points="1050,340 1180,480 920,480" fill="#0e244d" fill-opacity="0.6" stroke="#7dd3fc" stroke-width="1.8"/>
+  <polygon points="1260,390 1380,510 1140,510" fill="#0e244d" fill-opacity="0.5" stroke="#38bdf8" stroke-width="1.8"/>
+  <polygon points="900,430 1010,540 790,540" fill="#0e244d" fill-opacity="0.4" stroke="#38bdf8" stroke-width="1.8"/>
+
+  <!-- Peak Highlight Points -->
+  <circle cx="1050" cy="340" r="4" fill="#ffffff"/>
+  <circle cx="1260" cy="390" r="4" fill="#ffffff"/>
+
+  <!-- Center Placeholder Label Pill -->
+  <g transform="translate(560, 880)">
+    <rect width="480" height="44" rx="22" fill="#030712" fill-opacity="0.9" stroke="#38bdf8" stroke-opacity="0.5"/>
+    <text x="240" y="27" fill="#7dd3fc" font-family="monospace" font-size="13" font-weight="500" letter-spacing="2" text-anchor="middle">
+      PROJECT SCREENSHOT PLACEHOLDER • 1600 × 1000
+    </text>
+  </g>
+</svg>
