@@ -18,82 +18,97 @@ export function ExperienceSection() {
     if (!section) return
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    let ctx: gsap.Context | null = null
 
-    const ctx = gsap.context(() => {
-      // 1. Timeline line scaleY scrub
-      if (timelineLineRef.current) {
-        gsap.fromTo(
-          timelineLineRef.current,
-          { scaleY: 0 },
-          {
-            scaleY: 1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: section.querySelector('.timeline-container'),
-              start: 'top 75%',
-              end: 'bottom 60%',
-              scrub: true,
-            },
-          }
-        )
-      }
-
-      // 2. Timeline nodes and cards reveal
-      const items = section.querySelectorAll<HTMLElement>('.timeline-item')
-      items.forEach((item, idx) => {
-        const nodeDot = item.querySelector<HTMLElement>('.timeline-node-dot')
-        const card = item.querySelector<HTMLElement>('.timeline-card')
-        const isOdd = idx % 2 === 0
-        const isDesktop = window.innerWidth >= 768
-
-        if (prefersReducedMotion) {
-          gsap.from([nodeDot, card], {
-            opacity: 0,
-            duration: 0.6,
-            scrollTrigger: {
-              trigger: item,
-              start: 'top 80%',
-              once: true,
-            },
-          })
-        } else {
-          // Slide in from alternate sides on desktop (x: -40 for left, 40 for right)
-          const startX = isDesktop ? (isOdd ? -40 : 40) : 30
-
-          const tl = gsap.timeline({
-            scrollTrigger: {
-              trigger: item,
-              start: 'top 80%',
-              once: true,
-              onEnter: () => {
-                if (nodeDot) {
-                  nodeDot.classList.add('bg-sky-400', 'border-white', 'shadow-[0_0_18px_#38bdf8]')
-                }
-              },
-            },
-          })
-
-          tl.from(nodeDot, {
-            scale: 0,
-            opacity: 0,
-            duration: 0.5,
-            ease: 'back.out(2)',
-          }).from(
-            card,
+    const initAnimation = () => {
+      ctx = gsap.context(() => {
+        // 1. Timeline line scaleY scrub
+        if (timelineLineRef.current) {
+          gsap.fromTo(
+            timelineLineRef.current,
+            { scaleY: 0 },
             {
-              x: startX,
-              opacity: 0,
-              duration: 0.75,
-              ease: 'power3.out',
-            },
-            '-=0.3'
+              scaleY: 1,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: section.querySelector('.timeline-container'),
+                start: 'top 75%',
+                end: 'bottom 60%',
+                scrub: true,
+              },
+            }
           )
         }
-      })
-    }, section)
+
+        // 2. Timeline nodes and cards reveal
+        const items = section.querySelectorAll<HTMLElement>('.timeline-item')
+        items.forEach((item, idx) => {
+          const nodeDot = item.querySelector<HTMLElement>('.timeline-node-dot')
+          const card = item.querySelector<HTMLElement>('.timeline-card')
+          const isOdd = idx % 2 === 0
+          const isDesktop = window.innerWidth >= 768
+
+          if (prefersReducedMotion) {
+            gsap.from([nodeDot, card], {
+              opacity: 0,
+              duration: 0.6,
+              scrollTrigger: {
+                trigger: item,
+                start: 'top 80%',
+                once: true,
+              },
+            })
+          } else {
+            // Slide in from alternate sides on desktop (x: -40 for left, 40 for right)
+            const startX = isDesktop ? (isOdd ? -40 : 40) : 30
+
+            const tl = gsap.timeline({
+              scrollTrigger: {
+                trigger: item,
+                start: 'top 80%',
+                once: true,
+                onEnter: () => {
+                  if (nodeDot) {
+                    nodeDot.classList.add('bg-sky-400', 'border-white', 'shadow-[0_0_18px_#38bdf8]')
+                  }
+                },
+              },
+            })
+
+            tl.from(nodeDot, {
+              scale: 0,
+              opacity: 0,
+              duration: 0.5,
+              ease: 'back.out(2)',
+            }).from(
+              card,
+              {
+                x: startX,
+                opacity: 0,
+                duration: 0.75,
+                ease: 'power3.out',
+              },
+              '-=0.3'
+            )
+          }
+        })
+      }, section)
+    }
+
+    const schedule =
+      typeof window !== 'undefined' && 'requestIdleCallback' in window
+        ? (cb: () => void) => window.requestIdleCallback(cb, { timeout: 1500 })
+        : (cb: () => void) => setTimeout(cb, 100)
+
+    const handle = schedule(initAnimation)
 
     return () => {
-      ctx.revert()
+      if (typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(handle as number)
+      } else {
+        clearTimeout(handle as unknown as NodeJS.Timeout)
+      }
+      ctx?.revert()
     }
   }, [])
 
@@ -174,14 +189,14 @@ export function ExperienceSection() {
                   <CardSpotlight className="p-7 sm:p-8 rounded-2xl bg-slate-950/50 border border-sky-400/15 backdrop-blur-xl hover:border-sky-400/40 transition-all duration-300 shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
                     {/* Period badge */}
                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-400/25 text-[10px] font-mono text-sky-300 mb-4">
-                      <Calendar className="w-3 h-3 text-sky-400" />
+                      <Calendar aria-hidden="true" className="w-3 h-3 text-sky-400" />
                       <span>{item.period}</span>
                     </div>
 
                     <h3 className="text-xl sm:text-2xl font-light text-white tracking-tight">
                       {item.title}
                     </h3>
-                    <h4 className="text-sm font-mono text-sky-400/80 mb-4">
+                    <h4 className="text-sm font-mono text-sky-400 mb-4">
                       {item.area}
                     </h4>
 
@@ -192,8 +207,8 @@ export function ExperienceSection() {
                     {/* Highlights bullets */}
                     <div className="space-y-2">
                       {item.highlights.map((bullet, bIdx) => (
-                        <div key={bIdx} className="flex items-start gap-2.5 text-xs text-slate-400 font-light">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-sky-400 shrink-0 mt-0.5" />
+                        <div key={bIdx} className="flex items-start gap-2.5 text-xs text-slate-300 font-light">
+                          <CheckCircle2 aria-hidden="true" className="w-3.5 h-3.5 text-sky-400 shrink-0 mt-0.5" />
                           <span>{bullet}</span>
                         </div>
                       ))}

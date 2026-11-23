@@ -27,9 +27,9 @@ export function BuildingSection() {
   const marqueeBadges = MARQUEE_TECH_STACK.map((tech, i) => (
     <div
       key={i}
-      className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-950/70 border border-sky-400/20 text-xs font-mono text-sky-200 shadow-[0_0_15px_rgba(56,189,248,0.1)] hover:border-sky-400/50 hover:bg-sky-950/30 transition-all cursor-default"
+      className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-950/70 border border-sky-400/20 text-xs font-mono text-sky-200 shadow-[0_0_15px_rgba(56,189,248,0.1)] hover:border-sky-400/50 hover:bg-sky-950/30 transition-colors cursor-default"
     >
-      <Sparkles className="w-3 h-3 text-sky-400" />
+      <Sparkles aria-hidden="true" className="w-3 h-3 text-sky-400" />
       <span>{tech}</span>
     </div>
   ))
@@ -48,7 +48,7 @@ export function BuildingSection() {
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] as const }}
           className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-950/40 border border-sky-400/20 backdrop-blur-md mb-6"
         >
-          <Activity className="w-3.5 h-3.5 text-sky-400 animate-pulse" />
+          <Activity aria-hidden="true" className="w-3.5 h-3.5 text-sky-400" />
           <span className="text-[11px] font-mono tracking-widest uppercase text-sky-300">
             04 {'//'} Currently Building & Exploring
           </span>

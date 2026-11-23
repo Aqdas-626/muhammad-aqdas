@@ -1,13 +1,20 @@
 'use client'
 
 import React, { useRef, useMemo } from 'react'
-import * as THREE from 'three'
+import {
+  Group,
+  Mesh,
+  MathUtils,
+  IcosahedronGeometry,
+  OctahedronGeometry,
+} from 'three'
 import { useFrame } from '@react-three/fiber'
-import { Float, MeshTransmissionMaterial } from '@react-three/drei'
+import { Float } from '@react-three/drei'
+import type { QualityProfile } from '@/lib/deviceQuality'
 
 interface HeroCrystalProps {
-  isMobile?: boolean
   reducedMotion?: boolean
+  quality: QualityProfile
   crystalStateRef?: React.MutableRefObject<{
     rotX: number
     rotY: number
@@ -17,20 +24,20 @@ interface HeroCrystalProps {
 }
 
 export function HeroCrystal({
-  isMobile = false,
   reducedMotion = false,
+  quality,
   crystalStateRef,
 }: HeroCrystalProps) {
-  const groupRef = useRef<THREE.Group>(null)
-  const coreRef = useRef<THREE.Mesh>(null)
-  const shardsRef = useRef<THREE.Group>(null)
+  const groupRef = useRef<Group>(null)
+  const coreRef = useRef<Mesh>(null)
+  const shardsRef = useRef<Group>(null)
 
-  // Memoize geometries
-  const mainGeometry = useMemo(() => new THREE.IcosahedronGeometry(1.6, 0), [])
-  const coreGeometry = useMemo(() => new THREE.IcosahedronGeometry(0.85, 0), [])
-  const shardGeometry = useMemo(() => new THREE.OctahedronGeometry(0.4, 0), [])
+  // Memoize geometries with named imports
+  const mainGeometry = useMemo(() => new IcosahedronGeometry(1.6, 0), [])
+  const coreGeometry = useMemo(() => new IcosahedronGeometry(0.85, 0), [])
+  const shardGeometry = useMemo(() => new OctahedronGeometry(0.4, 0), [])
 
-  // Shard offsets for surrounding floating ice satellites
+  // Satellite ice shards
   const shardPositions: [number, number, number][] = useMemo(
     () => [
       [2.2, 0.9, -0.4],
@@ -45,7 +52,7 @@ export function HeroCrystal({
 
   const elapsedRef = useRef(0)
 
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => {
     if (!groupRef.current) return
 
     elapsedRef.current += delta
@@ -61,19 +68,19 @@ export function HeroCrystal({
     const idleSpinY = reducedMotion ? 0 : time * 0.12
     const idleSpinX = reducedMotion ? 0 : Math.sin(time * 0.4) * 0.08
 
-    groupRef.current.rotation.x = THREE.MathUtils.damp(
+    groupRef.current.rotation.x = MathUtils.damp(
       groupRef.current.rotation.x,
       targetRotX + idleSpinX,
       3,
       delta
     )
-    groupRef.current.rotation.y = THREE.MathUtils.damp(
+    groupRef.current.rotation.y = MathUtils.damp(
       groupRef.current.rotation.y,
       targetRotY + idleSpinY,
       3,
       delta
     )
-    groupRef.current.rotation.z = THREE.MathUtils.damp(
+    groupRef.current.rotation.z = MathUtils.damp(
       groupRef.current.rotation.z,
       targetRotZ,
       3,
@@ -82,7 +89,7 @@ export function HeroCrystal({
 
     // Scale dampening
     const currentScale = groupRef.current.scale.x
-    const newScale = THREE.MathUtils.damp(currentScale, targetScale, 3, delta)
+    const newScale = MathUtils.damp(currentScale, targetScale, 3, delta)
     groupRef.current.scale.set(newScale, newScale, newScale)
 
     // Inner glowing core pulse
@@ -106,41 +113,20 @@ export function HeroCrystal({
       floatingRange={[-0.1, 0.1]}
     >
       <group ref={groupRef}>
-        {/* Main Faceted Ice Crystal */}
+        {/* Main Faceted Ice Crystal using lightweight hardware-accelerated Physical Material */}
         <mesh geometry={mainGeometry} castShadow receiveShadow>
-          {isMobile ? (
-            // Optimized lightweight physical material for mobile/low-power
-            <meshPhysicalMaterial
-              color="#dbeafe"
-              roughness={0.12}
-              metalness={0.1}
-              transmission={0.65}
-              ior={1.31} // Refractive index of ice
-              thickness={1.5}
-              flatShading={true}
-              reflectivity={0.9}
-              clearcoat={1}
-              clearcoatRoughness={0.1}
-            />
-          ) : (
-            // Full glass/ice refraction transmission material for desktop
-            <MeshTransmissionMaterial
-              backside
-              samples={4}
-              resolution={512}
-              transmission={0.92}
-              roughness={0.14}
-              ior={1.31}
-              thickness={1.8}
-              chromaticAberration={0.06}
-              anisotropy={0.1}
-              distortion={0.0}
-              temporalDistortion={0.0}
-              color="#e0f2fe"
-              attenuationDistance={1.2}
-              attenuationColor="#38bdf8"
-            />
-          )}
+          <meshPhysicalMaterial
+            color="#dbeafe"
+            roughness={0.12}
+            metalness={0.1}
+            transmission={quality.tier === 'low' ? 0.35 : 0.65}
+            ior={1.31} // Refractive index of ice
+            thickness={1.5}
+            flatShading={true}
+            reflectivity={0.9}
+            clearcoat={1}
+            clearcoatRoughness={0.1}
+          />
         </mesh>
 
         {/* Inner Glowing Ice Core */}
@@ -155,21 +141,23 @@ export function HeroCrystal({
           />
         </mesh>
 
-        {/* Orbiting Satellite Shards */}
-        <group ref={shardsRef}>
-          {shardPositions.map((pos, idx) => (
-            <mesh key={idx} position={pos} geometry={shardGeometry}>
-              <meshStandardMaterial
-                color="#bae6fd"
-                roughness={0.2}
-                metalness={0.4}
-                flatShading={true}
-                transparent={true}
-                opacity={0.8}
-              />
-            </mesh>
-          ))}
-        </group>
+        {/* Orbiting Satellite Shards (omitted on low tier) */}
+        {quality.tier !== 'low' && (
+          <group ref={shardsRef}>
+            {shardPositions.map((pos, idx) => (
+              <mesh key={idx} position={pos} geometry={shardGeometry}>
+                <meshStandardMaterial
+                  color="#bae6fd"
+                  roughness={0.2}
+                  metalness={0.4}
+                  flatShading={true}
+                  transparent={true}
+                  opacity={0.8}
+                />
+              </mesh>
+            ))}
+          </group>
+        )}
       </group>
     </Float>
   )

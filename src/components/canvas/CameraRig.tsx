@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef } from 'react'
-import * as THREE from 'three'
+import { Vector3, MathUtils, FogExp2 } from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
 import { gsap } from '@/lib/gsap'
 import { CAMERA_KEYFRAMES } from '@/data/cameraKeyframes'
@@ -17,11 +17,11 @@ interface CameraRigProps {
 }
 
 export function CameraRig({ reducedMotion = false, crystalStateRef }: CameraRigProps) {
-  const { camera, scene } = useThree()
+  const { camera, scene, invalidate } = useThree()
 
-  // Track target LookAt vector for smooth damping
-  const currentLookAt = useRef(new THREE.Vector3(0, 0, 0))
-  const targetLookAt = useRef(new THREE.Vector3(0, 0, 0))
+  // Track target LookAt vector for smooth damping (pre-allocated once)
+  const currentLookAt = useRef(new Vector3(0, 0, 0))
+  const targetLookAt = useRef(new Vector3(0, 0, 0))
 
   // Mutable animated state object for GSAP timeline
   const rigState = useRef({
@@ -39,9 +39,8 @@ export function CameraRig({ reducedMotion = false, crystalStateRef }: CameraRigP
   })
 
   useEffect(() => {
-    // Wait for client mount and DOM layout
+    // Master GSAP timeline scrubbed across the scrollable page
     const ctx = gsap.context(() => {
-      // Build master GSAP timeline scrubbed across the scrollable page
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: '#scroll-root',
@@ -49,6 +48,10 @@ export function CameraRig({ reducedMotion = false, crystalStateRef }: CameraRigP
           end: 'bottom bottom',
           scrub: reducedMotion ? false : 1.2,
           invalidateOnRefresh: true,
+          onUpdate: () => {
+            // Trigger R3F frame render on scroll
+            invalidate()
+          },
         },
       })
 
@@ -80,7 +83,7 @@ export function CameraRig({ reducedMotion = false, crystalStateRef }: CameraRigP
     return () => {
       ctx.revert()
     }
-  }, [reducedMotion])
+  }, [reducedMotion, invalidate])
 
   useFrame((state, delta) => {
     const pointer = state.pointer
@@ -93,31 +96,31 @@ export function CameraRig({ reducedMotion = false, crystalStateRef }: CameraRigP
     const desiredCamY = rigState.current.camY + pointer.y * parallaxFactorY
     const desiredCamZ = rigState.current.camZ
 
-    // Damp camera position
-    camera.position.x = THREE.MathUtils.damp(camera.position.x, desiredCamX, 2.5, delta)
-    camera.position.y = THREE.MathUtils.damp(camera.position.y, desiredCamY, 2.5, delta)
-    camera.position.z = THREE.MathUtils.damp(camera.position.z, desiredCamZ, 2.5, delta)
+    // Damp camera position without allocations
+    camera.position.x = MathUtils.damp(camera.position.x, desiredCamX, 2.5, delta)
+    camera.position.y = MathUtils.damp(camera.position.y, desiredCamY, 2.5, delta)
+    camera.position.z = MathUtils.damp(camera.position.z, desiredCamZ, 2.5, delta)
 
-    // Damp camera lookAt target
+    // Damp camera lookAt target without allocations
     targetLookAt.current.set(
       rigState.current.targetX,
       rigState.current.targetY,
       rigState.current.targetZ
     )
 
-    currentLookAt.current.x = THREE.MathUtils.damp(
+    currentLookAt.current.x = MathUtils.damp(
       currentLookAt.current.x,
       targetLookAt.current.x,
       3,
       delta
     )
-    currentLookAt.current.y = THREE.MathUtils.damp(
+    currentLookAt.current.y = MathUtils.damp(
       currentLookAt.current.y,
       targetLookAt.current.y,
       3,
       delta
     )
-    currentLookAt.current.z = THREE.MathUtils.damp(
+    currentLookAt.current.z = MathUtils.damp(
       currentLookAt.current.z,
       targetLookAt.current.z,
       3,
@@ -136,8 +139,8 @@ export function CameraRig({ reducedMotion = false, crystalStateRef }: CameraRigP
 
     // Dynamic fog density update
     if (scene.fog && 'density' in scene.fog) {
-      ;(scene.fog as THREE.FogExp2).density = THREE.MathUtils.damp(
-        (scene.fog as THREE.FogExp2).density,
+      ;(scene.fog as FogExp2).density = MathUtils.damp(
+        (scene.fog as FogExp2).density,
         rigState.current.fogDensity,
         2,
         delta

@@ -59,44 +59,51 @@ export function SkillsSection() {
           },
         })
 
-        // 1. Cards stagger in (~0.1s apart)
-        tl.fromTo(
-          cards,
-          { y: 35, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.75,
-            stagger: 0.1,
-            ease: 'power3.out',
-          }
-        )
-          // 2. Skill rows reveal sequentially
-          .fromTo(
-            rows,
-            { y: 15, opacity: 0 },
+        const schedule =
+          typeof window !== 'undefined' && 'requestIdleCallback' in window
+            ? (cb: () => void) => window.requestIdleCallback(cb, { timeout: 1200 })
+            : (cb: () => void) => setTimeout(cb, 100)
+
+        schedule(() => {
+          // 1. Cards stagger in (~0.1s apart)
+          tl.fromTo(
+            cards,
+            { y: 35, opacity: 0 },
             {
               y: 0,
               opacity: 1,
-              duration: 0.5,
-              stagger: 0.05,
-              ease: 'power2.out',
-            },
-            '-=0.45'
+              duration: 0.75,
+              stagger: 0.1,
+              ease: 'power3.out',
+            }
           )
-          // 3. Level badges fade in last
-          .fromTo(
-            badges,
-            { opacity: 0, scale: 0.85 },
-            {
-              opacity: 1,
-              scale: 1,
-              duration: 0.4,
-              stagger: 0.04,
-              ease: 'back.out(1.5)',
-            },
-            '-=0.3'
-          )
+            // 2. Skill rows reveal sequentially
+            .fromTo(
+              rows,
+              { y: 15, opacity: 0 },
+              {
+                y: 0,
+                opacity: 1,
+                duration: 0.5,
+                stagger: 0.05,
+                ease: 'power2.out',
+              },
+              '-=0.45'
+            )
+            // 3. Level badges fade in last
+            .fromTo(
+              badges,
+              { opacity: 0, scale: 0.85 },
+              {
+                opacity: 1,
+                scale: 1,
+                duration: 0.4,
+                stagger: 0.04,
+                ease: 'back.out(1.5)',
+              },
+              '-=0.3'
+            )
+        })
 
         // Light column parallax on desktop (≥768px): ~20px total difference scrubbed
         if (window.innerWidth >= 768 && rightColRef.current) {
@@ -150,7 +157,7 @@ export function SkillsSection() {
         {/* Category Header */}
         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-sky-400/10">
           <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-400/20 flex items-center justify-center text-sky-300 group-hover:border-sky-400/50 transition-colors">
-            <Icon className="w-4 h-4" />
+            <Icon aria-hidden="true" className="w-4 h-4" />
           </div>
           <h3 className="text-base sm:text-lg font-medium text-white tracking-wide">
             {category.category}
@@ -162,7 +169,7 @@ export function SkillsSection() {
           {category.skills.map((skill) => (
             <div
               key={skill.name}
-              className="skill-row-item p-3.5 rounded-xl bg-slate-900/40 border border-white/5 hover:border-sky-400/30 hover:bg-sky-950/20 transition-all duration-200 will-change-transform"
+              className="skill-row-item p-3.5 rounded-xl bg-slate-900/40 border border-white/5 hover:border-sky-400/30 hover:bg-sky-950/20 transition-colors duration-200 will-change-transform"
             >
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-sm font-medium text-slate-100 tracking-wide">
@@ -172,7 +179,7 @@ export function SkillsSection() {
                   {skill.level}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-light leading-relaxed">
+              <p className="text-xs text-slate-300 font-light leading-relaxed">
                 {skill.description}
               </p>
             </div>

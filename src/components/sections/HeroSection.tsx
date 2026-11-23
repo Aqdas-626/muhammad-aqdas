@@ -19,32 +19,31 @@ export function HeroSection() {
     scrollTo(`#${id}`, { offset: 0, duration: 1.4 })
   }
 
-  // Initial typography entrance variants (Motion)
+  // Initial typography entrance variants (Composited opacity & transform only - NO filter/blur)
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.12,
-        delayChildren: 0.2,
+        staggerChildren: 0.1,
+        delayChildren: 0.1,
       },
     },
   }
 
   const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 30, filter: 'blur(8px)' },
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      filter: 'blur(0px)',
       transition: {
-        duration: 0.9,
+        duration: 0.8,
         ease: [0.16, 1, 0.3, 1] as const,
       },
     },
   }
 
-  // Scroll-driven exit parallax & scrubbed fadeouts
+  // Scroll-driven exit parallax & scrubbed fadeouts (pure transform & opacity)
   useEffect(() => {
     const section = sectionRef.current
     const scrollExit = scrollExitRef.current
@@ -55,7 +54,6 @@ export function HeroSection() {
 
     const ctx = gsap.context(() => {
       // 1. Hero text moves up slowly and fades as user scrolls away
-      // Uses fromTo with explicit start { opacity: 1, y: 0 } so it never starts or locks at 0
       gsap.fromTo(
         scrollExit,
         { opacity: 1, y: 0 },
@@ -129,15 +127,15 @@ export function HeroSection() {
         {/* Top spacer */}
         <div />
 
-        {/* Outer Scroll-Exit Container (driven purely by GSAP fromTo) */}
+        {/* Outer Scroll-Exit Container */}
         <div
           ref={scrollExitRef}
-          className="w-full max-w-4xl mx-auto my-auto will-change-transform"
+          className="w-full max-w-4xl mx-auto my-auto"
         >
-          {/* Inner Entrance Animation (driven purely by Motion) */}
+          {/* Inner Entrance Animation (visible in initial HTML for immediate LCP) */}
           <motion.div
             variants={containerVariants}
-            initial="hidden"
+            initial="visible"
             animate="visible"
             className="w-full text-center flex flex-col items-center pointer-events-auto"
           >
@@ -146,19 +144,28 @@ export function HeroSection() {
               variants={itemVariants}
               className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/60 border border-sky-400/20 backdrop-blur-md mb-8 shadow-[0_0_20px_rgba(56,189,248,0.15)]"
             >
-              <Sparkles className="w-3.5 h-3.5 text-sky-400 animate-pulse" />
+              <Sparkles aria-hidden="true" className="w-3.5 h-3.5 text-sky-400" />
               <span className="text-[11px] font-mono tracking-widest uppercase text-sky-200">
                 Creative Web & 3D Engineering
               </span>
             </motion.div>
 
-            {/* Hero Name with Staggered Glacial Gradient */}
+            {/* Hero Name: Fully painted in initial HTML as LCP element with accessible aria-label */}
             <motion.div variants={itemVariants} className="overflow-hidden">
-              <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-white uppercase leading-[0.95]">
-                <span className="block bg-gradient-to-b from-white via-slate-100 to-sky-200 bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(56,189,248,0.25)]">
+              <h1
+                aria-label="Muhammad Aqdas"
+                className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-white uppercase leading-[0.95]"
+              >
+                <span
+                  aria-hidden="true"
+                  className="block bg-gradient-to-b from-white via-slate-100 to-sky-200 bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(56,189,248,0.25)]"
+                >
                   Muhammad
                 </span>
-                <span className="block mt-1 sm:mt-2 bg-gradient-to-r from-sky-200 via-cyan-100 to-white bg-clip-text text-transparent">
+                <span
+                  aria-hidden="true"
+                  className="block mt-1 sm:mt-2 bg-gradient-to-r from-sky-200 via-cyan-100 to-white bg-clip-text text-transparent"
+                >
                   Aqdas
                 </span>
               </h1>
@@ -179,16 +186,17 @@ export function HeroSection() {
               Crafting fluid digital experiences, interactive web graphics, and modern frontend architectures in a cold, precision-tuned space.
             </motion.p>
 
-            {/* Interactive Call to Actions (with dedicated ctaExitRef) */}
+            {/* Interactive Call to Actions */}
             <motion.div variants={itemVariants} className="mt-10">
               <div
                 ref={ctaExitRef}
-                className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 will-change-transform"
+                className="flex flex-wrap items-center justify-center gap-4 sm:gap-6"
               >
                 <Magnetic strength={0.3}>
                   <button
                     onClick={() => handleScrollTo('work')}
-                    className="group relative px-7 py-3.5 rounded-full text-xs sm:text-sm font-mono tracking-widest text-slate-950 font-semibold bg-gradient-to-r from-sky-300 via-cyan-200 to-white hover:from-white hover:to-sky-300 transition-all duration-300 shadow-[0_0_25px_rgba(56,189,248,0.4)] hover:shadow-[0_0_35px_rgba(56,189,248,0.7)] hover:scale-105 active:scale-95"
+                    aria-label="View featured work section"
+                    className="group relative px-7 py-3.5 rounded-full text-xs sm:text-sm font-mono tracking-widest text-slate-950 font-semibold bg-gradient-to-r from-sky-300 via-cyan-200 to-white hover:from-white hover:to-sky-300 transition-transform duration-300 shadow-[0_0_25px_rgba(56,189,248,0.4)] hover:scale-105 active:scale-95"
                   >
                     <span>VIEW WORK</span>
                   </button>
@@ -197,7 +205,8 @@ export function HeroSection() {
                 <Magnetic strength={0.3}>
                   <button
                     onClick={() => handleScrollTo('contact')}
-                    className="px-7 py-3.5 rounded-full text-xs sm:text-sm font-mono tracking-widest text-slate-200 font-medium bg-slate-950/50 border border-sky-400/25 hover:border-sky-400/70 hover:bg-sky-500/10 transition-all duration-300 backdrop-blur-md shadow-[0_0_20px_rgba(0,0,0,0.5)] hover:scale-105 active:scale-95"
+                    aria-label="Contact Muhammad Aqdas"
+                    className="px-7 py-3.5 rounded-full text-xs sm:text-sm font-mono tracking-widest text-slate-200 font-medium bg-slate-950/50 border border-sky-400/25 hover:border-sky-400/70 hover:bg-sky-500/10 transition-transform duration-300 backdrop-blur-md shadow-[0_0_20px_rgba(0,0,0,0.5)] hover:scale-105 active:scale-95"
                   >
                     <span>CONTACT ME</span>
                   </button>
@@ -210,19 +219,21 @@ export function HeroSection() {
         {/* Floating Scroll Cue */}
         <div
           ref={scrollCueRef}
-          className="pointer-events-auto flex flex-col items-center gap-2 cursor-pointer mt-12 group will-change-transform"
+          role="button"
+          tabIndex={0}
+          aria-label="Scroll down to about section"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') handleScrollTo('about')
+          }}
+          className="pointer-events-auto flex flex-col items-center gap-2 cursor-pointer mt-12 group"
           onClick={() => handleScrollTo('about')}
         >
-          <span className="text-[10px] font-mono tracking-[0.25em] uppercase text-sky-400/70 group-hover:text-sky-300 transition-colors">
+          <span className="text-[10px] font-mono tracking-[0.25em] uppercase text-sky-400/90 group-hover:text-sky-300 transition-colors">
             Scroll to Explore
           </span>
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
-            className="w-7 h-10 rounded-full border border-sky-400/30 flex items-start justify-center p-1.5 group-hover:border-sky-400/70 transition-colors"
-          >
-            <span className="w-1 h-2 rounded-full bg-sky-400 shadow-[0_0_6px_#38bdf8]" />
-          </motion.div>
+          <div className="w-7 h-10 rounded-full border border-sky-400/30 flex items-start justify-center p-1.5 group-hover:border-sky-400/70 transition-colors">
+            <span className="w-1 h-2 rounded-full bg-sky-400 shadow-[0_0_6px_#38bdf8] animate-bounce" />
+          </div>
         </div>
       </Container>
     </section>

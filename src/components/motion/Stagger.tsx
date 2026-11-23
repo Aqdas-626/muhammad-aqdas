@@ -16,7 +16,8 @@ interface StaggerProps {
 
 /**
  * Stagger container.
- * Animates direct children from y: 40 and opacity: 0 on viewport entrance.
+ * Animates direct children with composited y & opacity on viewport entrance.
+ * Defers trigger creation to post-paint idle time to prevent main-thread blocking.
  */
 export function Stagger({
   children,
@@ -80,13 +81,25 @@ export function Stagger({
       }, el)
     }
 
-    if (typeof document !== 'undefined' && document.fonts) {
-      document.fonts.ready.then(initAnimation)
-    } else {
-      initAnimation()
-    }
+    const schedule =
+      typeof window !== 'undefined' && 'requestIdleCallback' in window
+        ? (cb: () => void) => window.requestIdleCallback(cb, { timeout: 1200 })
+        : (cb: () => void) => setTimeout(cb, 100)
+
+    const handle = schedule(() => {
+      if (typeof document !== 'undefined' && document.fonts) {
+        document.fonts.ready.then(initAnimation)
+      } else {
+        initAnimation()
+      }
+    })
 
     return () => {
+      if (typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(handle as number)
+      } else {
+        clearTimeout(handle as unknown as NodeJS.Timeout)
+      }
       ctx?.revert()
     }
   }, [stagger, delay, y, duration, start])

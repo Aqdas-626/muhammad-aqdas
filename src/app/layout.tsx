@@ -10,16 +10,19 @@ import { Preloader } from '@/components/ui/Preloader'
 import { SectionIndicator } from '@/components/ui/SectionIndicator'
 import { PERSONAL_INFO } from '@/data/constants'
 
+// Subset only explicitly used font weights with display: swap
 const syne = Syne({
   variable: '--font-syne',
   subsets: ['latin'],
   display: 'swap',
+  weight: ['700', '800'],
 })
 
 const inter = Inter({
   variable: '--font-inter',
   subsets: ['latin'],
   display: 'swap',
+  weight: ['300', '400', '500', '600'],
 })
 
 export const viewport: Viewport = {
@@ -91,6 +94,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${syne.variable} ${inter.variable} dark antialiased`}>
       <body className="relative bg-[#030712] text-slate-100 min-h-screen selection:bg-sky-500/30 selection:text-white">
+        {/* Accessible Skip to Content Link */}
+        <a
+          href="#hero"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-sky-400 focus:text-slate-950 focus:font-mono focus:text-sm focus:rounded-md focus:shadow-lg focus:outline-none"
+        >
+          Skip to main content
+        </a>
+
         <SmoothScrollProvider>
           {/* Top Scroll Progress Bar */}
           <ProgressBar />
@@ -98,10 +109,10 @@ export default function RootLayout({
           {/* Fine-Pointer Custom Cursor */}
           <CustomCursor />
 
-          {/* Cinematic Arctic Preloader */}
+          {/* Cinematic Arctic Preloader (strictly capped & unmounted on exit) */}
           <Preloader />
 
-          {/* Persistent Background 3D Scene */}
+          {/* Deferred Background 3D Scene */}
           <SceneWrapper />
 
           {/* UI Shell Navigation */}
@@ -110,7 +121,7 @@ export default function RootLayout({
           {/* Desktop Vertical Section Indicator */}
           <SectionIndicator />
 
-          {/* Main Content Root with ScrollTrigger Anchor ID */}
+          {/* Main Content Root with Landmark */}
           <main id="scroll-root" className="relative z-10 w-full">
             {children}
           </main>

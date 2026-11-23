@@ -124,14 +124,14 @@ export function ContactSection() {
                 >
                   {copied ? (
                     <>
-                      <Check className="w-4 h-4 text-emerald-400 animate-in zoom-in duration-200" />
-                      <span className="text-emerald-400 font-semibold animate-in fade-in duration-200">
+                      <Check aria-hidden="true" className="w-4 h-4 text-emerald-400" />
+                      <span className="text-emerald-400 font-semibold">
                         Copied!
                       </span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-4 h-4 text-slate-400" />
+                      <Copy aria-hidden="true" className="w-4 h-4 text-slate-300" />
                       <span>Copy</span>
                     </>
                   )}
@@ -141,7 +141,7 @@ export function ContactSection() {
 
             {/* Social Channels with Hover Lift */}
             <CardSpotlight className="p-6 rounded-2xl bg-slate-950/50 border border-sky-400/15 backdrop-blur-xl">
-              <span className="text-[10px] font-mono tracking-widest uppercase text-sky-400/80 mb-3 block">
+              <span className="text-[10px] font-mono tracking-widest uppercase text-sky-400 mb-3 block">
                 Social Profiles
               </span>
               <div className="flex items-center gap-3">
@@ -149,28 +149,28 @@ export function ContactSection() {
                   href={PERSONAL_INFO.socials.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="GitHub Profile"
-                  className="p-3 rounded-xl bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-all duration-200"
+                  aria-label="Visit Muhammad Aqdas on GitHub"
+                  className="p-3 rounded-xl bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-transform duration-200"
                 >
-                  <GithubIcon className="w-5 h-5" />
+                  <GithubIcon aria-hidden="true" className="w-5 h-5" />
                 </a>
                 <a
                   href={PERSONAL_INFO.socials.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="LinkedIn Profile"
-                  className="p-3 rounded-xl bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-all duration-200"
+                  aria-label="Visit Muhammad Aqdas on LinkedIn"
+                  className="p-3 rounded-xl bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-transform duration-200"
                 >
-                  <LinkedinIcon className="w-5 h-5" />
+                  <LinkedinIcon aria-hidden="true" className="w-5 h-5" />
                 </a>
                 <a
                   href={PERSONAL_INFO.socials.twitter}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Twitter / X Profile"
-                  className="p-3 rounded-xl bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-all duration-200"
+                  aria-label="Visit Muhammad Aqdas on Twitter / X"
+                  className="p-3 rounded-xl bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-transform duration-200"
                 >
-                  <TwitterXIcon className="w-5 h-5" />
+                  <TwitterXIcon aria-hidden="true" className="w-5 h-5" />
                 </a>
               </div>
             </CardSpotlight>
@@ -182,14 +182,15 @@ export function ContactSection() {
               {isSubmitted ? (
                 <div className="py-12 text-center space-y-4">
                   <div className="w-12 h-12 rounded-full bg-sky-500/10 border border-sky-400/40 text-sky-400 mx-auto flex items-center justify-center">
-                    <Check className="w-6 h-6" />
+                    <Check aria-hidden="true" className="w-6 h-6" />
                   </div>
                   <h3 className="text-xl font-light text-white">Transmission Received</h3>
-                  <p className="text-xs sm:text-sm text-slate-400 font-light max-w-sm mx-auto">
+                  <p className="text-xs sm:text-sm text-slate-300 font-light max-w-sm mx-auto">
                     Thank you for reaching out. I will review your message and reply as soon as possible.
                   </p>
                   <button
                     onClick={() => setIsSubmitted(false)}
+                    aria-label="Send another message"
                     className="mt-4 px-6 py-2 rounded-full text-xs font-mono text-sky-300 border border-sky-400/30 hover:border-sky-400/60 transition-colors"
                   >
                     Send another message
@@ -211,7 +212,7 @@ export function ContactSection() {
                         placeholder="John Doe"
                         className={`w-full px-4 py-3 rounded-xl bg-slate-900/90 border ${
                           errors.name ? 'border-rose-400/80 focus:border-rose-400' : 'border-sky-400/20 focus:border-sky-400/70'
-                        } text-sm text-white placeholder-slate-600 focus:outline-none transition-colors font-light`}
+                        } text-sm text-white placeholder-slate-400 focus:outline-none transition-colors font-light`}
                       />
                       {errors.name && (
                         <span className="block text-[11px] font-mono text-rose-400">{errors.name}</span>
@@ -231,7 +232,7 @@ export function ContactSection() {
                         placeholder="john@example.com"
                         className={`w-full px-4 py-3 rounded-xl bg-slate-900/90 border ${
                           errors.email ? 'border-rose-400/80 focus:border-rose-400' : 'border-sky-400/20 focus:border-sky-400/70'
-                        } text-sm text-white placeholder-slate-600 focus:outline-none transition-colors font-light`}
+                        } text-sm text-white placeholder-slate-400 focus:outline-none transition-colors font-light`}
                       />
                       {errors.email && (
                         <span className="block text-[11px] font-mono text-rose-400">{errors.email}</span>
@@ -251,7 +252,7 @@ export function ContactSection() {
                         placeholder="Tell me about your concept, timeline, or engineering challenge..."
                         className={`w-full px-4 py-3 rounded-xl bg-slate-900/90 border ${
                           errors.message ? 'border-rose-400/80 focus:border-rose-400' : 'border-sky-400/20 focus:border-sky-400/70'
-                        } text-sm text-white placeholder-slate-600 focus:outline-none transition-colors font-light resize-none`}
+                        } text-sm text-white placeholder-slate-400 focus:outline-none transition-colors font-light resize-none`}
                       />
                       {errors.message && (
                         <span className="block text-[11px] font-mono text-rose-400">{errors.message}</span>
@@ -263,14 +264,15 @@ export function ContactSection() {
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full group inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl text-xs font-mono tracking-widest text-slate-950 font-semibold bg-gradient-to-r from-sky-300 via-cyan-200 to-white hover:from-white hover:to-sky-300 transition-all duration-300 shadow-[0_0_20px_rgba(56,189,248,0.3)] hover:shadow-[0_0_30px_rgba(56,189,248,0.6)] disabled:opacity-50 active:scale-[0.99]"
+                        aria-label="Transmit message"
+                        className="w-full group inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl text-xs font-mono tracking-widest text-slate-950 font-semibold bg-gradient-to-r from-sky-300 via-cyan-200 to-white hover:from-white hover:to-sky-300 transition-transform duration-300 shadow-[0_0_20px_rgba(56,189,248,0.3)] disabled:opacity-50 active:scale-[0.99]"
                       >
                         {isSubmitting ? (
                           <span>TRANSMITTING...</span>
                         ) : (
                           <>
                             <span>TRANSMIT MESSAGE</span>
-                            <Send className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                            <Send aria-hidden="true" className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                           </>
                         )}
                       </button>

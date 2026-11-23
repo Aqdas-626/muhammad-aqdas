@@ -12,6 +12,7 @@ interface MagneticProps {
 /**
  * Magnetic button wrapper.
  * Attracts toward the cursor on hover. Strictly enabled for fine-pointer desktop devices.
+ * Bounds are cached on enter and mouse moves are rAF throttled to prevent forced reflows.
  */
 export function Magnetic({
   children,
@@ -19,6 +20,8 @@ export function Magnetic({
   className = '',
 }: MagneticProps) {
   const magneticRef = useRef<HTMLDivElement>(null)
+  const rectRef = useRef<DOMRect | null>(null)
+  const rafRef = useRef<number | null>(null)
 
   useEffect(() => {
     const el = magneticRef.current
@@ -29,23 +32,44 @@ export function Magnetic({
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (!isFinePointer || prefersReducedMotion) return
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = el.getBoundingClientRect()
-      const centerX = rect.left + rect.width / 2
-      const centerY = rect.top + rect.height / 2
-      const deltaX = (e.clientX - centerX) * strength
-      const deltaY = (e.clientY - centerY) * strength
+    const handleMouseEnter = () => {
+      rectRef.current = el.getBoundingClientRect()
+    }
 
-      gsap.to(el, {
-        x: deltaX,
-        y: deltaY,
-        duration: 0.25,
-        ease: 'power2.out',
-        overwrite: 'auto',
+    const handleMouseMove = (e: MouseEvent) => {
+      const clientX = e.clientX
+      const clientY = e.clientY
+
+      if (rafRef.current) return
+
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null
+        if (!el) return
+        if (!rectRef.current) {
+          rectRef.current = el.getBoundingClientRect()
+        }
+        const rect = rectRef.current
+        const centerX = rect.left + rect.width / 2
+        const centerY = rect.top + rect.height / 2
+        const deltaX = (clientX - centerX) * strength
+        const deltaY = (clientY - centerY) * strength
+
+        gsap.to(el, {
+          x: deltaX,
+          y: deltaY,
+          duration: 0.25,
+          ease: 'power2.out',
+          overwrite: 'auto',
+        })
       })
     }
 
     const handleMouseLeave = () => {
+      rectRef.current = null
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current)
+        rafRef.current = null
+      }
       gsap.to(el, {
         x: 0,
         y: 0,
@@ -55,12 +79,15 @@ export function Magnetic({
       })
     }
 
+    el.addEventListener('mouseenter', handleMouseEnter)
     el.addEventListener('mousemove', handleMouseMove)
     el.addEventListener('mouseleave', handleMouseLeave)
 
     return () => {
+      el.removeEventListener('mouseenter', handleMouseEnter)
       el.removeEventListener('mousemove', handleMouseMove)
       el.removeEventListener('mouseleave', handleMouseLeave)
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
       gsap.killTweensOf(el)
     }
   }, [strength])

@@ -69,7 +69,7 @@ export function AboutSection() {
             <Stagger className="grid grid-cols-2 sm:grid-cols-4 gap-4" stagger={0.08} delay={0.15}>
               {quickFacts.map((fact, idx) => (
                 <div key={idx} className="space-y-1">
-                  <span className="block text-[10px] font-mono tracking-wider text-sky-400/70 uppercase">
+                  <span className="block text-[10px] font-mono tracking-wider text-sky-400 uppercase">
                     {fact.label}
                   </span>
                   <span className="block text-xs sm:text-sm font-medium text-slate-100">
@@ -89,21 +89,22 @@ export function AboutSection() {
             <Magnetic strength={0.35}>
               <a
                 href="#resume"
+                aria-label="Download resume PDF"
                 onClick={(e) => {
                   e.preventDefault()
                   alert(
                     'Resume download placeholder: Add your resume PDF file to public/resume.pdf to activate direct download.'
                   )
                 }}
-                className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-full text-xs font-mono tracking-wider text-slate-950 font-semibold bg-gradient-to-r from-sky-300 to-white hover:from-white hover:to-sky-300 transition-all duration-300 shadow-[0_0_20px_rgba(56,189,248,0.3)] hover:shadow-[0_0_30px_rgba(56,189,248,0.6)] hover:scale-105 active:scale-95"
+                className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-full text-xs font-mono tracking-wider text-slate-950 font-semibold bg-gradient-to-r from-sky-300 to-white hover:from-white hover:to-sky-300 transition-transform duration-300 shadow-[0_0_20px_rgba(56,189,248,0.3)] hover:scale-105 active:scale-95"
               >
-                <FileDown className="w-4 h-4 text-slate-950 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                <FileDown aria-hidden="true" className="w-4 h-4 text-slate-950 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                 <span>DOWNLOAD RESUME</span>
               </a>
             </Magnetic>
 
-            <div className="flex items-center gap-2 text-xs font-mono text-slate-400 px-3 py-2">
-              <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0" />
+            <div className="flex items-center gap-2 text-xs font-mono text-slate-300 px-3 py-2">
+              <CheckCircle2 aria-hidden="true" className="w-4 h-4 text-sky-400 shrink-0" />
               <span>Open for contract & full-time frontend roles</span>
             </div>
           </div>

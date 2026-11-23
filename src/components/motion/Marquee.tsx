@@ -62,24 +62,39 @@ export function Marquee({
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (prefersReducedMotion) return
 
-    const fromX = direction === 'left' ? 0 : -50
-    const toX = direction === 'left' ? -50 : 0
+    let tl: gsap.core.Timeline | null = null
 
-    const tl = gsap.timeline({ repeat: -1 })
-    tl.fromTo(
-      track,
-      { xPercent: fromX },
-      {
-        xPercent: toX,
-        duration,
-        ease: 'none',
-      }
-    )
-    timelineRef.current = tl
+    const schedule =
+      typeof window !== 'undefined' && 'requestIdleCallback' in window
+        ? (cb: () => void) => window.requestIdleCallback(cb, { timeout: 1500 })
+        : (cb: () => void) => setTimeout(cb, 100)
+
+    const handle = schedule(() => {
+      if (!trackRef.current) return
+      const fromX = direction === 'left' ? 0 : -50
+      const toX = direction === 'left' ? -50 : 0
+
+      tl = gsap.timeline({ repeat: -1 })
+      tl.fromTo(
+        trackRef.current,
+        { xPercent: fromX },
+        {
+          xPercent: toX,
+          duration,
+          ease: 'none',
+        }
+      )
+      timelineRef.current = tl
+    })
 
     return () => {
+      if (typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(handle as number)
+      } else {
+        clearTimeout(handle as unknown as NodeJS.Timeout)
+      }
       if (decayTimer.current) clearTimeout(decayTimer.current)
-      tl.kill()
+      tl?.kill()
     }
   }, [duration, direction])
 
@@ -123,8 +138,8 @@ export function Marquee({
             <React.Fragment key={`a-${idx}`}>{item}</React.Fragment>
           ))}
         </div>
-        {/* Set 2 (for seamless looping) */}
-        <div className="flex items-center gap-6 shrink-0">
+        {/* Set 2 (for seamless looping - hidden from accessibility tree) */}
+        <div className="flex items-center gap-6 shrink-0" aria-hidden="true">
           {items.map((item, idx) => (
             <React.Fragment key={`b-${idx}`}>{item}</React.Fragment>
           ))}

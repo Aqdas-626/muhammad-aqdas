@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef } from 'react'
+import React, { useRef, useCallback } from 'react'
 
 interface CardSpotlightProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode
@@ -11,7 +11,8 @@ interface CardSpotlightProps extends React.HTMLAttributes<HTMLDivElement> {
 
 /**
  * Glass card container with cursor-following radial spotlight glow.
- * Updates CSS variables (--mx, --my) without React re-render overhead.
+ * Throttles pointer moves with requestAnimationFrame and updates CSS variables only.
+ * Caches element bounds on enter to prevent forced reflows.
  */
 export function CardSpotlight({
   children,
@@ -21,20 +22,49 @@ export function CardSpotlight({
   ...rest
 }: CardSpotlightProps) {
   const cardRef = useRef<HTMLDivElement>(null)
+  const rectRef = useRef<DOMRect | null>(null)
+  const rafRef = useRef<number | null>(null)
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseEnter = () => {
+    if (cardRef.current) {
+      rectRef.current = cardRef.current.getBoundingClientRect()
+    }
+  }
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return
-    const rect = cardRef.current.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    cardRef.current.style.setProperty('--mx', `${x}px`)
-    cardRef.current.style.setProperty('--my', `${y}px`)
+    const clientX = e.clientX
+    const clientY = e.clientY
+
+    if (rafRef.current) return
+
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null
+      if (!cardRef.current) return
+      if (!rectRef.current) {
+        rectRef.current = cardRef.current.getBoundingClientRect()
+      }
+      const x = clientX - rectRef.current.left
+      const y = clientY - rectRef.current.top
+      cardRef.current.style.setProperty('--mx', `${x}px`)
+      cardRef.current.style.setProperty('--my', `${y}px`)
+    })
+  }, [])
+
+  const handleMouseLeave = () => {
+    rectRef.current = null
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
+    }
   }
 
   return (
     <div
       ref={cardRef}
+      onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       className={`group/spotlight relative ${className}`}
       {...rest}
     >

@@ -24,15 +24,42 @@ function ProjectRow({
   index: number
 }) {
   const frameRef = useRef<HTMLDivElement>(null)
+  const rectRef = useRef<DOMRect | null>(null)
+  const rafRef = useRef<number | null>(null)
   const isOdd = index % 2 === 0 // Projects 1 and 3: image left; Project 2: image right
+
+  const handleMouseEnter = () => {
+    if (frameRef.current) {
+      rectRef.current = frameRef.current.getBoundingClientRect()
+    }
+  }
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!frameRef.current) return
-    const rect = frameRef.current.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    frameRef.current.style.setProperty('--mx', `${x}px`)
-    frameRef.current.style.setProperty('--my', `${y}px`)
+    const clientX = e.clientX
+    const clientY = e.clientY
+
+    if (rafRef.current) return
+
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null
+      if (!frameRef.current) return
+      if (!rectRef.current) {
+        rectRef.current = frameRef.current.getBoundingClientRect()
+      }
+      const x = clientX - rectRef.current.left
+      const y = clientY - rectRef.current.top
+      frameRef.current.style.setProperty('--mx', `${x}px`)
+      frameRef.current.style.setProperty('--my', `${y}px`)
+    })
+  }
+
+  const handleMouseLeave = () => {
+    rectRef.current = null
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
+    }
   }
 
   return (
@@ -47,8 +74,10 @@ function ProjectRow({
       >
         <div
           ref={frameRef}
+          onMouseEnter={handleMouseEnter}
           onMouseMove={handleMouseMove}
-          className="group/frame relative rounded-xl border border-sky-400/20 bg-slate-950/70 backdrop-blur-xl shadow-[0_15px_40px_rgba(0,0,0,0.6)] hover:border-sky-400/40 hover:-translate-y-1 transition-all duration-500 ease-out"
+          onMouseLeave={handleMouseLeave}
+          className="group/frame relative rounded-xl border border-sky-400/20 bg-slate-950/70 backdrop-blur-xl shadow-[0_15px_40px_rgba(0,0,0,0.6)] hover:border-sky-400/40 hover:-translate-y-1 transition-transform duration-500 ease-out"
         >
           {/* Soft ambient radial glow behind frame */}
           <div className="absolute -inset-4 bg-sky-500/10 rounded-2xl blur-2xl pointer-events-none -z-10 group-hover/frame:bg-sky-400/20 transition-all duration-700" />
@@ -219,125 +248,128 @@ export function WorkSection() {
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    let ctx: gsap.Context | null = null
 
-    const ctx = gsap.context(() => {
-      const rowElements = sectionRef.current?.querySelectorAll<HTMLElement>('.project-row')
-      if (!rowElements) return
+    const initAnimation = () => {
+      ctx = gsap.context(() => {
+        const rowElements = sectionRef.current?.querySelectorAll<HTMLElement>('.project-row')
+        if (!rowElements) return
 
-      rowElements.forEach((row, idx) => {
-        const isOdd = idx % 2 === 0
-        const imageCol = row.querySelector('.project-image-col')
-        const textRows = row.querySelectorAll('.project-text-row')
-        const pills = row.querySelectorAll('.tech-pill')
-        const parallaxImg = row.querySelector('.project-parallax-img')
-        const watermark = row.querySelector('.project-watermark')
+        rowElements.forEach((row, idx) => {
+          const isOdd = idx % 2 === 0
+          const imageCol = row.querySelector('.project-image-col')
+          const textRows = row.querySelectorAll('.project-text-row')
+          const pills = row.querySelectorAll('.tech-pill')
+          const parallaxImg = row.querySelector('.project-parallax-img')
+          const watermark = row.querySelector('.project-watermark')
 
-        if (prefersReducedMotion) {
-          gsap.from([imageCol, ...Array.from(textRows)], {
-            opacity: 0,
-            duration: 0.6,
-            stagger: 0.08,
-            scrollTrigger: {
-              trigger: row,
-              start: 'top 85%',
-              once: true,
-            },
-          })
-        } else {
-          // Slide in image from its side (x: ±48)
-          const isDesktop = window.innerWidth >= 1024
-          const imageStartX = isDesktop ? (isOdd ? -48 : 48) : -36
-
-          const tl = gsap.timeline({
-            scrollTrigger: {
-              trigger: row,
-              start: 'top 80%',
-              once: true,
-            },
-          })
-
-          tl.from(imageCol, {
-            x: imageStartX,
-            opacity: 0,
-            duration: 0.85,
-            ease: 'power3.out',
-          })
-            .from(
-              textRows,
-              {
-                y: 25,
-                opacity: 0,
-                duration: 0.7,
-                stagger: 0.08,
-                ease: 'power3.out',
+          if (prefersReducedMotion) {
+            gsap.from([imageCol, ...Array.from(textRows)], {
+              opacity: 0,
+              duration: 0.6,
+              stagger: 0.08,
+              scrollTrigger: {
+                trigger: row,
+                start: 'top 85%',
+                once: true,
               },
-              '-=0.6'
-            )
-            .from(
-              pills,
-              {
-                scale: 0.85,
-                opacity: 0,
-                duration: 0.35,
-                stagger: 0.04,
-                ease: 'back.out(1.5)',
+            })
+          } else {
+            // Slide in image from its side (x: ±48)
+            const isDesktop = window.innerWidth >= 1024
+            const imageStartX = isDesktop ? (isOdd ? -48 : 48) : -36
+
+            const tl = gsap.timeline({
+              scrollTrigger: {
+                trigger: row,
+                start: 'top 80%',
+                once: true,
               },
-              '-=0.3'
-            )
+            })
 
-          // Inner image parallax (~6% opposite movement)
-          if (parallaxImg) {
-            gsap.fromTo(
-              parallaxImg,
-              { yPercent: -6 },
-              {
-                yPercent: 6,
-                ease: 'none',
-                scrollTrigger: {
-                  trigger: row,
-                  start: 'top bottom',
-                  end: 'bottom top',
-                  scrub: true,
+            tl.from(imageCol, {
+              x: imageStartX,
+              opacity: 0,
+              duration: 0.85,
+              ease: 'power3.out',
+            })
+              .from(
+                textRows,
+                {
+                  y: 25,
+                  opacity: 0,
+                  duration: 0.7,
+                  stagger: 0.08,
+                  ease: 'power3.out',
                 },
-              }
-            )
-          }
-
-          // Large watermark index drifts slightly slower than foreground content
-          if (watermark) {
-            gsap.fromTo(
-              watermark,
-              { y: -20 },
-              {
-                y: 20,
-                ease: 'none',
-                scrollTrigger: {
-                  trigger: row,
-                  start: 'top bottom',
-                  end: 'bottom top',
-                  scrub: true,
+                '-=0.6'
+              )
+              .from(
+                pills,
+                {
+                  scale: 0.85,
+                  opacity: 0,
+                  duration: 0.35,
+                  stagger: 0.04,
+                  ease: 'back.out(1.5)',
                 },
-              }
-            )
+                '-=0.3'
+              )
+
+            // Inner image parallax (~6% opposite movement)
+            if (parallaxImg) {
+              gsap.fromTo(
+                parallaxImg,
+                { yPercent: -6 },
+                {
+                  yPercent: 6,
+                  ease: 'none',
+                  scrollTrigger: {
+                    trigger: row,
+                    start: 'top bottom',
+                    end: 'bottom top',
+                    scrub: true,
+                  },
+                }
+              )
+            }
+
+            // Large watermark index drifts slightly slower than foreground content
+            if (watermark) {
+              gsap.fromTo(
+                watermark,
+                { y: -20 },
+                {
+                  y: 20,
+                  ease: 'none',
+                  scrollTrigger: {
+                    trigger: row,
+                    start: 'top bottom',
+                    end: 'bottom top',
+                    scrub: true,
+                  },
+                }
+              )
+            }
           }
-        }
-      })
-    }, sectionRef)
-
-    const refreshTimer = setTimeout(() => {
-      ScrollTrigger.refresh()
-    }, 200)
-
-    const onWindowLoad = () => ScrollTrigger.refresh()
-    window.addEventListener('load', onWindowLoad)
-    if (typeof document !== 'undefined') {
-      document.fonts.ready.then(() => ScrollTrigger.refresh())
+        })
+      }, sectionRef)
     }
 
+    const schedule =
+      typeof window !== 'undefined' && 'requestIdleCallback' in window
+        ? (cb: () => void) => window.requestIdleCallback(cb, { timeout: 1500 })
+        : (cb: () => void) => setTimeout(cb, 100)
+
+    const handle = schedule(initAnimation)
+
     return () => {
-      window.removeEventListener('load', onWindowLoad)
-      clearTimeout(refreshTimer)
-      ctx.revert()
+      if (typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(handle as number)
+      } else {
+        clearTimeout(handle as unknown as NodeJS.Timeout)
+      }
+      ctx?.revert()
     }
   }, [])
 

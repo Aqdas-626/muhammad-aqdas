@@ -47,25 +47,39 @@ export function CountUp({
     const counterObj = { val: 0 }
     let ctx: gsap.Context | null = null
 
-    ctx = gsap.context(() => {
-      gsap.to(counterObj, {
-        val: targetNumber,
-        duration,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: el,
-          start,
-          once: true,
-        },
-        onUpdate: () => {
-          if (el) {
-            el.textContent = `${prefix}${counterObj.val.toFixed(decimals)}${extractedSuffix}`
-          }
-        },
-      })
-    }, el)
+    const initAnimation = () => {
+      ctx = gsap.context(() => {
+        gsap.to(counterObj, {
+          val: targetNumber,
+          duration,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: el,
+            start,
+            once: true,
+          },
+          onUpdate: () => {
+            if (el) {
+              el.textContent = `${prefix}${counterObj.val.toFixed(decimals)}${extractedSuffix}`
+            }
+          },
+        })
+      }, el)
+    }
+
+    const schedule =
+      typeof window !== 'undefined' && 'requestIdleCallback' in window
+        ? (cb: () => void) => window.requestIdleCallback(cb, { timeout: 1500 })
+        : (cb: () => void) => setTimeout(cb, 100)
+
+    const handle = schedule(initAnimation)
 
     return () => {
+      if (typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(handle as number)
+      } else {
+        clearTimeout(handle as unknown as NodeJS.Timeout)
+      }
       ctx?.revert()
     }
   }, [targetNumber, duration, prefix, extractedSuffix, decimals, start])

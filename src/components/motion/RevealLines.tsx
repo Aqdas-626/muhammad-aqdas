@@ -13,13 +13,13 @@ interface RevealLinesProps {
   stagger?: number
   skewWithVelocity?: boolean
   triggerId?: string
+  'aria-label'?: string
 }
 
 /**
  * Masked line-by-line heading reveal.
- * Line splitting and animation wrappers are mounted ONLY on the client to prevent SSR hydration mismatches.
- * Each line is wrapped in an overflow: hidden container, translating from 110% to 0%.
- * Includes subtle velocity-driven skewY (capped to ±1.5deg) eased smoothly back to 0.
+ * Line splitting and animation wrappers are deferred to requestIdleCallback
+ * to break up main-thread long tasks and guarantee zero forced reflows during first paint.
  */
 export function RevealLines({
   children,
@@ -28,18 +28,35 @@ export function RevealLines({
   as: Tag = 'h2',
   delay = 0,
   stagger = 0.09,
-  skewWithVelocity = true,
+  skewWithVelocity = false, // Disabled by default for better compositing performance
   triggerId,
+  'aria-label': ariaLabel,
 }: RevealLinesProps) {
   const [mounted, setMounted] = useState(false)
   const containerRef = useRef<HTMLElement>(null)
   const skewTimer = useRef<NodeJS.Timeout | null>(null)
 
+  // Defer mounting split DOM to post-paint idle time
   useEffect(() => {
-    setMounted(true)
+    const schedule =
+      typeof window !== 'undefined' && 'requestIdleCallback' in window
+        ? (cb: () => void) => window.requestIdleCallback(cb, { timeout: 1200 })
+        : (cb: () => void) => setTimeout(cb, 60)
+
+    const handle = schedule(() => {
+      setMounted(true)
+    })
+
+    return () => {
+      if (typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(handle as number)
+      } else {
+        clearTimeout(handle as unknown as NodeJS.Timeout)
+      }
+    }
   }, [])
 
-  // Subtle velocity skew effect (runs only after client mount)
+  // Velocity skew effect throttled
   useLenisVelocity((velocity) => {
     if (!mounted || !skewWithVelocity || !containerRef.current) return
     const prefersReducedMotion =
@@ -47,7 +64,6 @@ export function RevealLines({
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (prefersReducedMotion) return
 
-    // Cap at ±1.5 degrees
     const clampedSkew = Math.max(-1.5, Math.min(1.5, velocity * 0.05))
 
     gsap.to(containerRef.current, {
@@ -70,6 +86,7 @@ export function RevealLines({
     }, 120)
   })
 
+  // GSAP Reveal Animation setup batched after idle
   useEffect(() => {
     if (!mounted) return
     const el = containerRef.current
@@ -100,25 +117,26 @@ export function RevealLines({
               },
             }
           )
-        } else {
-          gsap.fromTo(
-            inners,
-            { yPercent: 110, opacity: 0 },
-            {
-              yPercent: 0,
-              opacity: 1,
-              duration: 0.9,
-              delay,
-              stagger,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: triggerTarget,
-                start: 'top 85%',
-                once: true,
-              },
-            }
-          )
+          return
         }
+
+        gsap.fromTo(
+          inners,
+          { y: '110%', opacity: 0 },
+          {
+            y: '0%',
+            opacity: 1,
+            duration: 1.05,
+            delay,
+            stagger,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: triggerTarget,
+              start: 'top 88%',
+              once: true,
+            },
+          }
+        )
       }, el)
     }
 
@@ -129,40 +147,58 @@ export function RevealLines({
     }
 
     return () => {
-      if (skewTimer.current) clearTimeout(skewTimer.current)
       ctx?.revert()
     }
   }, [mounted, delay, stagger, triggerId])
 
-  // SSR and pre-mount render: deterministic plain text / lines (100% hydration match)
+  // Process lines
+  let resolvedLines: React.ReactNode[] = []
+  let textFallback = ''
+
+  if (lines && lines.length > 0) {
+    resolvedLines = lines
+    textFallback = lines.filter((l) => typeof l === 'string').join(' ')
+  } else if (typeof children === 'string') {
+    resolvedLines = children.split('\n').filter((l) => l.trim().length > 0)
+    textFallback = children
+  } else if (children) {
+    resolvedLines = [children]
+  }
+
+  const effectiveAriaLabel = ariaLabel || (textFallback ? textFallback : undefined)
+
+  // SSR & Pre-mount: Render semantic un-nested lines (zero hydration diff & instant LCP)
   if (!mounted) {
     return (
-      // @ts-expect-error dynamic HTML tag
-      <Tag ref={containerRef} className={`relative block ${className}`}>
-        {lines ? (
-          lines.map((item, idx) => (
-            <span key={idx} className="block">
-              {item}
-            </span>
-          ))
-        ) : (
-          children
-        )}
+      <Tag
+        ref={containerRef as any}
+        aria-label={effectiveAriaLabel}
+        className={`relative block ${className}`}
+      >
+        {resolvedLines.map((item, idx) => (
+          <span key={idx} className="block">
+            {item}
+          </span>
+        ))}
       </Tag>
     )
   }
 
-  // Extract items to render as lines after mount
-  const lineItems = lines ?? (React.Children.count(children) > 0 ? React.Children.toArray(children) : [])
-
-  // Client mounted render: split into overflow-hidden wrappers for line-by-line GSAP reveal
+  // Mounted client render: Lines wrapped in overflow-hidden masks
   return (
-    // @ts-expect-error dynamic HTML tag
-    <Tag ref={containerRef} className={`relative block will-change-transform ${className}`}>
-      {lineItems.map((item, idx) => (
-        <span key={idx} className="block overflow-hidden pb-1 -mb-1">
+    <Tag
+      ref={containerRef as any}
+      aria-label={effectiveAriaLabel}
+      className={`relative block ${className}`}
+    >
+      {resolvedLines.map((lineContent, idx) => (
+        <span
+          key={idx}
+          aria-hidden={effectiveAriaLabel ? 'true' : undefined}
+          className="block overflow-hidden pb-1 -mb-1"
+        >
           <span className="reveal-line-inner block will-change-transform">
-            {item}
+            {lineContent}
           </span>
         </span>
       ))}

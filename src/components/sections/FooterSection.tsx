@@ -29,48 +29,63 @@ export function FooterSection() {
     if (!el) return
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    let ctx: gsap.Context | null = null
 
-    const ctx = gsap.context(() => {
-      // 1. Footer slides up and fades in
-      if (prefersReducedMotion) {
-        gsap.from(el, {
-          opacity: 0,
-          duration: 0.6,
-          scrollTrigger: {
-            trigger: el,
-            start: 'top 95%',
-            once: true,
-          },
-        })
-      } else {
-        gsap.from(el, {
-          y: 40,
-          opacity: 0,
-          duration: 0.85,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: el,
-            start: 'top 95%',
-            once: true,
-          },
-        })
-      }
+    const initAnimation = () => {
+      ctx = gsap.context(() => {
+        // 1. Footer slides up and fades in
+        if (prefersReducedMotion) {
+          gsap.from(el, {
+            opacity: 0,
+            duration: 0.6,
+            scrollTrigger: {
+              trigger: el,
+              start: 'top 95%',
+              once: true,
+            },
+          })
+        } else {
+          gsap.from(el, {
+            y: 40,
+            opacity: 0,
+            duration: 0.85,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: el,
+              start: 'top 95%',
+              once: true,
+            },
+          })
+        }
 
-      // 2. Floating back to top button visibility toggle after passing hero
-      const heroEl = document.getElementById('hero')
-      if (heroEl) {
-        ScrollTrigger.create({
-          trigger: heroEl,
-          start: 'bottom 40%',
-          onToggle: (self) => {
-            setShowFloatingTop(!self.isActive)
-          },
-        })
-      }
-    }, el)
+        // 2. Floating back to top button visibility toggle after passing hero
+        const heroEl = document.getElementById('hero')
+        if (heroEl) {
+          ScrollTrigger.create({
+            trigger: heroEl,
+            start: 'bottom 40%',
+            onToggle: (self) => {
+              setShowFloatingTop(!self.isActive)
+            },
+          })
+        }
+      }, el)
+    }
+
+    const schedule =
+      typeof window !== 'undefined' && 'requestIdleCallback' in window
+        ? (cb: () => void) => window.requestIdleCallback(cb, { timeout: 1500 })
+        : (cb: () => void) => setTimeout(cb, 100)
+
+    const handle = schedule(initAnimation)
 
     return () => {
-      ctx.revert()
+      if (typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(handle as number)
+      } else {
+        clearTimeout(handle as unknown as NodeJS.Timeout)
+      }
+      ctx?.revert()
     }
   }, [])
 
@@ -79,7 +94,7 @@ export function FooterSection() {
       {/* Floating Back to Top button (Appears once hero is passed) */}
       {mounted && (
         <div
-          className={`fixed bottom-6 right-6 z-40 transition-all duration-300 ${
+          className={`fixed bottom-6 right-6 z-40 transition-transform duration-300 ${
             showFloatingTop ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
           }`}
         >
@@ -87,9 +102,9 @@ export function FooterSection() {
             <button
               onClick={handleScrollToTop}
               aria-label="Back to top"
-              className="p-3 rounded-full bg-slate-950/85 border border-sky-400/30 text-sky-300 hover:text-white hover:border-sky-400/70 hover:scale-110 active:scale-95 transition-all shadow-[0_0_20px_rgba(56,189,248,0.3)] backdrop-blur-md flex items-center justify-center group"
+              className="p-3 rounded-full bg-slate-950/85 border border-sky-400/30 text-sky-300 hover:text-white hover:border-sky-400/70 hover:scale-110 active:scale-95 transition-transform shadow-[0_0_20px_rgba(56,189,248,0.3)] backdrop-blur-md flex items-center justify-center group"
             >
-              <ArrowUp className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
+              <ArrowUp aria-hidden="true" className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
             </button>
           </Magnetic>
         </div>
@@ -110,14 +125,14 @@ export function FooterSection() {
                   {PERSONAL_INFO.name}
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-slate-400 font-light max-w-sm leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-300 font-light max-w-sm leading-relaxed">
                 Frontend developer crafting high-performance 3D graphics, fluid motion choreographies, and modern web architectures.
               </p>
             </div>
 
             {/* Quick navigation */}
             <div className="md:col-span-4 space-y-3">
-              <span className="block text-[10px] font-mono tracking-widest uppercase text-sky-400/80">
+              <span className="block text-[10px] font-mono tracking-widest uppercase text-sky-400">
                 Quick Navigation
               </span>
               <div className="grid grid-cols-2 gap-2 text-xs font-mono">
@@ -125,7 +140,8 @@ export function FooterSection() {
                   <button
                     key={item.id}
                     onClick={() => handleNavClick(item.id)}
-                    className="text-left text-slate-400 hover:text-sky-300 transition-colors py-1"
+                    aria-label={`Scroll to ${item.label} section`}
+                    className="text-left text-slate-300 hover:text-sky-300 transition-colors py-1"
                   >
                     {item.label}
                   </button>
@@ -136,7 +152,7 @@ export function FooterSection() {
             {/* Channels & Back to Top */}
             <div className="md:col-span-3 flex flex-col justify-between items-start md:items-end space-y-6">
               <div className="space-y-3 md:text-right">
-                <span className="block text-[10px] font-mono tracking-widest uppercase text-sky-400/80">
+                <span className="block text-[10px] font-mono tracking-widest uppercase text-sky-400">
                   Direct Channels
                 </span>
                 <div className="flex items-center gap-3">
@@ -144,35 +160,35 @@ export function FooterSection() {
                     href={PERSONAL_INFO.socials.github}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="GitHub Profile"
-                    className="p-2 rounded-lg bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-all"
+                    aria-label="Visit Muhammad Aqdas on GitHub"
+                    className="p-2 rounded-lg bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-transform"
                   >
-                    <GithubIcon className="w-4 h-4" />
+                    <GithubIcon aria-hidden="true" className="w-4 h-4" />
                   </a>
                   <a
                     href={PERSONAL_INFO.socials.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="LinkedIn Profile"
-                    className="p-2 rounded-lg bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-all"
+                    aria-label="Visit Muhammad Aqdas on LinkedIn"
+                    className="p-2 rounded-lg bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-transform"
                   >
-                    <LinkedinIcon className="w-4 h-4" />
+                    <LinkedinIcon aria-hidden="true" className="w-4 h-4" />
                   </a>
                   <a
                     href={PERSONAL_INFO.socials.twitter}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="Twitter / X Profile"
-                    className="p-2 rounded-lg bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-all"
+                    aria-label="Visit Muhammad Aqdas on Twitter / X"
+                    className="p-2 rounded-lg bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-transform"
                   >
-                    <TwitterXIcon className="w-4 h-4" />
+                    <TwitterXIcon aria-hidden="true" className="w-4 h-4" />
                   </a>
                   <a
                     href={`mailto:${PERSONAL_INFO.email}`}
                     aria-label="Email Muhammad Aqdas"
-                    className="p-2 rounded-lg bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-all"
+                    className="p-2 rounded-lg bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-transform"
                   >
-                    <Mail className="w-4 h-4" />
+                    <Mail aria-hidden="true" className="w-4 h-4" />
                   </a>
                 </div>
               </div>
@@ -180,21 +196,22 @@ export function FooterSection() {
               {/* Scroll to top action */}
               <button
                 onClick={handleScrollToTop}
+                aria-label="Back to top of page"
                 className="inline-flex items-center gap-2 text-xs font-mono text-sky-300 hover:text-white transition-colors group/top py-1"
               >
                 <span>Back to top</span>
-                <ArrowUp className="w-3.5 h-3.5 transition-transform group-hover/top:-translate-y-0.5" />
+                <ArrowUp aria-hidden="true" className="w-3.5 h-3.5 transition-transform group-hover/top:-translate-y-0.5" />
               </button>
             </div>
           </div>
 
           {/* Bottom Bar: Copyright & Specs */}
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-500">
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-400">
             <p>
               © 2026 {PERSONAL_INFO.name}. Built with Next.js, R3F, GSAP & Tailwind.
             </p>
             <p className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               <span>All systems operational // 60 FPS</span>
             </p>
           </div>

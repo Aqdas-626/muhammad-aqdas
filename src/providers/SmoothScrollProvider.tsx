@@ -59,20 +59,27 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     }
     lenis.on('scroll', onScroll)
 
-    // Refresh ScrollTrigger after fonts and full window load settle
-    const onWindowLoad = () => ScrollTrigger.refresh()
+    // Refresh ScrollTrigger after fonts and full window load settle (deferred to idle to prevent layout thrash)
+    const scheduleRefresh = () => {
+      const schedule =
+        typeof window !== 'undefined' && 'requestIdleCallback' in window
+          ? (cb: () => void) => window.requestIdleCallback(cb, { timeout: 1500 })
+          : (cb: () => void) => setTimeout(cb, 100)
+      schedule(() => ScrollTrigger.refresh())
+    }
+
     if (typeof document !== 'undefined') {
-      document.fonts.ready.then(() => {
-        ScrollTrigger.refresh()
-      })
-      window.addEventListener('load', onWindowLoad)
+      if (document.fonts) {
+        document.fonts.ready.then(scheduleRefresh)
+      }
+      window.addEventListener('load', scheduleRefresh, { once: true })
     }
 
     // Create a GSAP context for potential page-wide cleanup
     const ctx = gsap.context(() => {})
 
     return () => {
-      window.removeEventListener('load', onWindowLoad)
+      window.removeEventListener('load', scheduleRefresh)
       ctx.revert()
       lenis.off('scroll', onScroll)
       gsap.ticker.remove(tickerUpdate)

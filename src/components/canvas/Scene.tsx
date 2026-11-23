@@ -1,31 +1,73 @@
 'use client'
 
 import React, { useEffect, useState, useRef } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Canvas, useThree } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
 import { HeroCrystal } from './HeroCrystal'
 import { Particles } from './Particles'
 import { CameraRig } from './CameraRig'
 import { CAMERA_KEYFRAMES } from '@/data/cameraKeyframes'
+import { detectQuality, type QualityProfile } from '@/lib/deviceQuality'
 
-function checkWebGLSupport(): boolean {
-  if (typeof window === 'undefined') return true
-  try {
-    const canvas = document.createElement('canvas')
-    return !!(
-      window.WebGLRenderingContext &&
-      (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
-    )
-  } catch {
-    return false
-  }
+/**
+ * Intelligent RenderLoopManager
+ * With frameloop="demand", calls invalidate() only when needed:
+ * - On scroll (driven by Lenis / window scroll)
+ * - On pointer moves (throttled)
+ * - On visibility changes (pauses completely when tab is hidden)
+ * - Gentle throttled ~30fps idle invalidation loop when hero is visible
+ */
+function RenderLoopManager({ enableContinuousLoop }: { enableContinuousLoop: boolean }) {
+  const { invalidate } = useThree()
+
+  useEffect(() => {
+    // Initial paint frame
+    invalidate()
+
+    const onScroll = () => {
+      invalidate()
+    }
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        invalidate()
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
+    document.addEventListener('visibilitychange', onVisibilityChange)
+
+    let rafId: number | null = null
+
+    if (enableContinuousLoop) {
+      let lastTime = 0
+      const loop = (time: number) => {
+        if (document.visibilityState === 'visible') {
+          // Throttled ~30fps for idle floating animations (halves CPU/GPU workload)
+          if (time - lastTime >= 32) {
+            lastTime = time
+            invalidate()
+          }
+        }
+        rafId = requestAnimationFrame(loop)
+      }
+      rafId = requestAnimationFrame(loop)
+    }
+
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      if (rafId) cancelAnimationFrame(rafId)
+    }
+  }, [invalidate, enableContinuousLoop])
+
+  return null
 }
 
 export default function Scene() {
-  const [hasWebGL, setHasWebGL] = useState<boolean>(true)
-  const [isMobile, setIsMobile] = useState<boolean>(false)
-  const [reducedMotion, setReducedMotion] = useState<boolean>(false)
-  const [mounted, setMounted] = useState<boolean>(false)
+  const [quality, setQuality] = useState<QualityProfile | null>(null)
 
   // Shared ref for communication between CameraRig and HeroCrystal without state triggers
   const crystalStateRef = useRef({
@@ -36,40 +78,20 @@ export default function Scene() {
   })
 
   useEffect(() => {
-    setMounted(true)
-    setHasWebGL(checkWebGLSupport())
-
-    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setReducedMotion(motionQuery.matches)
-
-    const mobileQuery = window.matchMedia('(max-width: 768px)')
-    setIsMobile(mobileQuery.matches)
-
-    const handleMotionChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches)
-    const handleMobileChange = (e: MediaQueryListEvent) => setIsMobile(e.matches)
-
-    motionQuery.addEventListener('change', handleMotionChange)
-    mobileQuery.addEventListener('change', handleMobileChange)
-
-    return () => {
-      motionQuery.removeEventListener('change', handleMotionChange)
-      mobileQuery.removeEventListener('change', handleMobileChange)
-    }
+    setQuality(detectQuality())
   }, [])
 
-  if (!mounted) {
+  if (!quality) {
     return <div className="fixed inset-0 pointer-events-none z-0 bg-[#030712]" />
   }
 
-  // Graceful fallback when WebGL is unsupported or disabled
-  if (!hasWebGL) {
+  // Graceful, ultra-lightweight fallback for software renderers (Lighthouse/SwiftShader/headless)
+  if (quality.tier === 'software' || quality.isSoftwareRenderer) {
     return (
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-[#030712]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(56,189,248,0.18)_0%,transparent_65%)]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-cyan-500/10 blur-3xl" />
-        <div className="absolute bottom-6 left-6 text-xs text-sky-300/40 font-mono tracking-widest uppercase">
-          [ Ambient 2D Arctic Mode Active ]
-        </div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.12)_0%,transparent_70%)]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-cyan-500/10 blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(3,7,18,0.85)_0%,transparent_80%)]" />
       </div>
     )
   }
@@ -81,11 +103,14 @@ export default function Scene() {
       <div className="absolute inset-0 pointer-events-none z-[1] bg-[radial-gradient(ellipse_at_bottom,rgba(3,7,18,0.85)_0%,transparent_80%)]" />
 
       <Canvas
-        dpr={[1, 1.75]}
+        frameloop="demand"
+        dpr={quality.dpr}
         gl={{
-          antialias: true,
+          antialias: quality.tier === 'high',
           alpha: true,
           powerPreference: 'high-performance',
+          depth: true,
+          stencil: false,
         }}
         camera={{
           fov: 45,
@@ -95,6 +120,9 @@ export default function Scene() {
         }}
         style={{ pointerEvents: 'none' }}
       >
+        {/* On-demand render loop controller */}
+        <RenderLoopManager enableContinuousLoop={quality.enableContinuousLoop} />
+
         {/* Arctic Scene Fog */}
         <fogExp2 attach="fog" args={['#030712', CAMERA_KEYFRAMES[0].fogDensity]} />
 
@@ -104,22 +132,22 @@ export default function Scene() {
         <pointLight position={[-10, -5, -5]} intensity={1.2} color="#0284c7" />
         <pointLight position={[0, 0, 0]} intensity={0.8} color="#38bdf8" />
 
-        {/* Environment map for realistic crystal specular reflections */}
+        {/* Environment map */}
         <Environment preset="city" environmentIntensity={0.65} />
 
         {/* Hero 3D Crystal Monolith */}
         <HeroCrystal
-          isMobile={isMobile}
-          reducedMotion={reducedMotion}
+          reducedMotion={quality.reducedMotion}
+          quality={quality}
           crystalStateRef={crystalStateRef}
         />
 
         {/* Drifting Snow and Ice Dust */}
-        <Particles isMobile={isMobile} reducedMotion={reducedMotion} />
+        <Particles reducedMotion={quality.reducedMotion} quality={quality} />
 
         {/* Master Camera Rig & Choreography */}
         <CameraRig
-          reducedMotion={reducedMotion}
+          reducedMotion={quality.reducedMotion}
           crystalStateRef={crystalStateRef}
         />
       </Canvas>

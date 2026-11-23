@@ -14,9 +14,9 @@ interface ScrubWordsProps {
 
 /**
  * Paragraph word scrubber.
- * Word splitting is deferred until AFTER client mount to guarantee 100% SSR hydration match.
- * Splits text into individual word spans and scrubs their opacity from 0.2 to 1
- * as the element travels through the viewport.
+ * Word splitting and ScrollTrigger initialization are deferred to idle callback
+ * to eliminate long tasks on the main thread during initial load.
+ * Screen readers read the full sentence smoothly via aria-label.
  */
 export function ScrubWords({
   children,
@@ -32,7 +32,22 @@ export function ScrubWords({
   const words = content.split(/\s+/).filter(Boolean)
 
   useEffect(() => {
-    setMounted(true)
+    const schedule =
+      typeof window !== 'undefined' && 'requestIdleCallback' in window
+        ? (cb: () => void) => window.requestIdleCallback(cb, { timeout: 1500 })
+        : (cb: () => void) => setTimeout(cb, 80)
+
+    const handle = schedule(() => {
+      setMounted(true)
+    })
+
+    return () => {
+      if (typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(handle as number)
+      } else {
+        clearTimeout(handle as unknown as NodeJS.Timeout)
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -82,28 +97,36 @@ export function ScrubWords({
     }
   }, [mounted, words.length, start, end])
 
-  // SSR and pre-mount render: plain deterministic paragraph text (100% hydration match)
+  // SSR and pre-mount render: plain deterministic text
   if (!mounted) {
     return (
-      // @ts-expect-error dynamic HTML tag
-      <Tag ref={containerRef} className={`relative block leading-relaxed ${className}`}>
+      <Tag
+        ref={containerRef as any}
+        aria-label={content}
+        className={`relative block leading-relaxed ${className}`}
+      >
         {content}
       </Tag>
     )
   }
 
-  // Client mounted render: split words for GSAP scrubbed opacity
+  // Client mounted render: split words for GSAP scrubbed opacity with accessible label
   return (
-    // @ts-expect-error dynamic HTML tag
-    <Tag ref={containerRef} className={`relative block leading-relaxed ${className}`}>
-      {words.map((word, idx) => (
-        <span
-          key={idx}
-          className="scrub-word inline-block opacity-20 will-change-[opacity]"
-        >
-          {word}&nbsp;
-        </span>
-      ))}
+    <Tag
+      ref={containerRef as any}
+      aria-label={content}
+      className={`relative block leading-relaxed ${className}`}
+    >
+      <span aria-hidden="true">
+        {words.map((word, idx) => (
+          <React.Fragment key={idx}>
+            <span className="scrub-word inline-block will-change-[opacity]">
+              {word}
+            </span>
+            {idx < words.length - 1 ? ' ' : ''}
+          </React.Fragment>
+        ))}
+      </span>
     </Tag>
   )
 }

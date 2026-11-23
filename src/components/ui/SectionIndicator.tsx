@@ -87,10 +87,10 @@ export function SectionIndicator() {
               className="relative p-1.5 focus:outline-none focus-visible:ring-1 focus-visible:ring-sky-400 rounded-full"
             >
               <span
-                className={`block transition-all duration-300 rounded-full ${
+                className={`block w-2 h-5 rounded-full transition-transform duration-300 origin-center ${
                   isActive
-                    ? 'w-2 h-5 bg-sky-400 shadow-[0_0_10px_#38bdf8]'
-                    : 'w-1.5 h-1.5 bg-slate-600 hover:bg-sky-400/80 hover:scale-125'
+                    ? 'scale-y-100 bg-sky-400 shadow-[0_0_10px_#38bdf8] opacity-100'
+                    : 'scale-y-[0.35] bg-slate-500 opacity-60 hover:opacity-100 hover:scale-y-[0.55]'
                 }`}
               />
             </button>

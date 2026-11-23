@@ -1,16 +1,33 @@
+import dynamic from 'next/dynamic'
 import { HeroSection } from '@/components/sections/HeroSection'
-import { AboutSection } from '@/components/sections/AboutSection'
-import { SkillsSection } from '@/components/sections/SkillsSection'
-import { WorkSection } from '@/components/sections/WorkSection'
-import { BuildingSection } from '@/components/sections/BuildingSection'
-import { ExperienceSection } from '@/components/sections/ExperienceSection'
-import { ContactSection } from '@/components/sections/ContactSection'
-import { FooterSection } from '@/components/sections/FooterSection'
+
+// Lazy-load below-the-fold sections with next/dynamic to minimize initial JS bundle
+const AboutSection = dynamic(
+  () => import('@/components/sections/AboutSection').then((mod) => mod.AboutSection)
+)
+const SkillsSection = dynamic(
+  () => import('@/components/sections/SkillsSection').then((mod) => mod.SkillsSection)
+)
+const WorkSection = dynamic(
+  () => import('@/components/sections/WorkSection').then((mod) => mod.WorkSection)
+)
+const BuildingSection = dynamic(
+  () => import('@/components/sections/BuildingSection').then((mod) => mod.BuildingSection)
+)
+const ExperienceSection = dynamic(
+  () => import('@/components/sections/ExperienceSection').then((mod) => mod.ExperienceSection)
+)
+const ContactSection = dynamic(
+  () => import('@/components/sections/ContactSection').then((mod) => mod.ContactSection)
+)
+const FooterSection = dynamic(
+  () => import('@/components/sections/FooterSection').then((mod) => mod.FooterSection)
+)
 
 export default function Home() {
   return (
     <div className="relative w-full flex flex-col">
-      {/* 01 // HERO */}
+      {/* 01 // HERO (Eagerly loaded for instant LCP) */}
       <HeroSection />
 
       {/* 02 // ABOUT */}
