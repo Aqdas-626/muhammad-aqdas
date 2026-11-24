@@ -33,49 +33,29 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://muhammadaqdas.dev'),
-  title: {
-    default: `${PERSONAL_INFO.name} — ${PERSONAL_INFO.role}`,
-    template: `%s | ${PERSONAL_INFO.name}`,
-  },
-  description: `${PERSONAL_INFO.name} is a ${PERSONAL_INFO.role} specializing in 3D WebGL experiences, Next.js architecture, and fluid motion design.`,
-  keywords: [
-    'Muhammad Aqdas',
-    'Frontend Developer',
-    'Creative Developer',
-    'Three.js Portfolio',
-    'React Three Fiber',
-    'Next.js 16',
-    'GSAP ScrollTrigger',
-    'Lenis Smooth Scroll',
-    'Motion',
-    'Tailwind CSS',
-    'WebGL',
-  ],
-  authors: [{ name: PERSONAL_INFO.name, url: 'https://muhammadaqdas.dev' }],
+  metadataBase: new URL(PERSONAL_INFO.siteUrl),
+  title: 'Muhammad Aqdas | Frontend Developer – React, Next.js & Three.js',
+  description:
+    'Muhammad Aqdas is a fresher frontend developer building responsive React and Next.js interfaces with 3D and motion. Open to internships and junior roles.',
+  authors: [{ name: PERSONAL_INFO.name, url: PERSONAL_INFO.siteUrl }],
   creator: PERSONAL_INFO.name,
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://muhammadaqdas.dev',
-    title: `${PERSONAL_INFO.name} — ${PERSONAL_INFO.role}`,
-    description: PERSONAL_INFO.tagline,
+    url: PERSONAL_INFO.siteUrl,
+    title: 'Muhammad Aqdas | Frontend Developer – React, Next.js & Three.js',
+    description:
+      'Muhammad Aqdas is a fresher frontend developer building responsive React and Next.js interfaces with 3D and motion. Open to internships and junior roles.',
     siteName: `${PERSONAL_INFO.name} Portfolio`,
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: `${PERSONAL_INFO.name} — 3D Frontend Portfolio`,
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${PERSONAL_INFO.name} — ${PERSONAL_INFO.role}`,
-    description: PERSONAL_INFO.tagline,
-    images: ['/og-image.png'],
-    creator: '@muhammadaqdas',
+    title: 'Muhammad Aqdas | Frontend Developer – React, Next.js & Three.js',
+    description:
+      'Muhammad Aqdas is a fresher frontend developer building responsive React and Next.js interfaces with 3D and motion. Open to internships and junior roles.',
   },
   robots: {
     index: true,
@@ -91,8 +71,26 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: PERSONAL_INFO.name,
+    jobTitle: 'Frontend Developer',
+    url: PERSONAL_INFO.siteUrl,
+    sameAs: [
+      PERSONAL_INFO.socials.github,
+      PERSONAL_INFO.socials.linkedin,
+    ],
+  }
+
   return (
     <html lang="en" className={`${syne.variable} ${inter.variable} dark antialiased`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="relative bg-[#030712] text-slate-100 min-h-screen selection:bg-sky-500/30 selection:text-white">
         {/* Accessible Skip to Content Link */}
         <a

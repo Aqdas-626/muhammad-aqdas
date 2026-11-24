@@ -13,9 +13,9 @@ const SECTIONS: SectionItem[] = [
   { id: 'hero', label: '00 // Overview' },
   { id: 'about', label: '01 // About' },
   { id: 'skills', label: '02 // Skills' },
-  { id: 'work', label: '03 // Work' },
-  { id: 'building', label: '04 // Building' },
-  { id: 'experience', label: '05 // Experience' },
+  { id: 'work', label: '03 // Projects' },
+  { id: 'building', label: '04 // Learning' },
+  { id: 'experience', label: '05 // Journey' },
   { id: 'contact', label: '06 // Contact' },
 ]
 

@@ -7,7 +7,7 @@ import { NAV_ITEMS, PERSONAL_INFO } from '@/data/constants'
 import { Container } from '@/components/ui/Container'
 import { Magnetic } from '@/components/motion/Magnetic'
 import { ArrowUp, Mail } from 'lucide-react'
-import { GithubIcon, LinkedinIcon, TwitterXIcon } from '@/components/ui/Icons'
+import { GithubIcon, LinkedinIcon } from '@/components/ui/Icons'
 
 export function FooterSection() {
   const { scrollTo } = useSmoothScroll()
@@ -101,119 +101,101 @@ export function FooterSection() {
           <Magnetic strength={0.35}>
             <button
               onClick={handleScrollToTop}
-              aria-label="Back to top"
-              className="p-3 rounded-full bg-slate-950/85 border border-sky-400/30 text-sky-300 hover:text-white hover:border-sky-400/70 hover:scale-110 active:scale-95 transition-transform shadow-[0_0_20px_rgba(56,189,248,0.3)] backdrop-blur-md flex items-center justify-center group"
+              aria-label="Scroll back to top of the page"
+              className="p-3.5 rounded-full bg-slate-900/90 border border-sky-400/30 text-sky-400 hover:text-white hover:border-sky-400/70 hover:bg-sky-500/20 backdrop-blur-xl shadow-[0_0_20px_rgba(56,189,248,0.25)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
             >
-              <ArrowUp aria-hidden="true" className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
+              <ArrowUp aria-hidden="true" className="w-5 h-5" />
             </button>
           </Magnetic>
         </div>
       )}
 
+      {/* Main Footer Container */}
       <footer
         id="footer"
         ref={footerRef}
-        className="relative w-full py-20 pb-12 [isolation:isolate] select-none pointer-events-none border-t border-sky-400/10 bg-slate-950/50 backdrop-blur-xl"
+        className="relative w-full py-16 md:py-20 border-t border-sky-400/15 bg-slate-950/80 backdrop-blur-xl select-none"
       >
-        <Container className="pointer-events-auto">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-16 border-b border-white/5">
-            {/* Brand info */}
+        <Container>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 mb-12">
+            {/* Col 1: Brand & Subtitle */}
             <div className="md:col-span-5 space-y-4">
-              <div className="flex items-center gap-2.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shadow-[0_0_8px_#38bdf8]" />
-                <span className="font-semibold text-lg tracking-widest text-white uppercase">
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-lg bg-sky-500/10 border border-sky-400/30 flex items-center justify-center shadow-[0_0_12px_rgba(56,189,248,0.2)]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shadow-[0_0_6px_#38bdf8]" />
+                </div>
+                <span className="font-medium text-sm tracking-widest text-white uppercase">
                   {PERSONAL_INFO.name}
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-slate-300 font-light max-w-sm leading-relaxed">
-                Frontend developer crafting high-performance 3D graphics, fluid motion choreographies, and modern web architectures.
+              <p className="text-xs sm:text-sm text-slate-400 max-w-sm font-light leading-relaxed">
+                Fresher frontend developer learning to build fast, responsive interfaces with React, Next.js, and TypeScript, and exploring 3D with Three.js.
               </p>
             </div>
 
-            {/* Quick navigation */}
+            {/* Col 2: Navigation Links */}
             <div className="md:col-span-4 space-y-3">
-              <span className="block text-[10px] font-mono tracking-widest uppercase text-sky-400">
-                Quick Navigation
+              <span className="text-[10px] font-mono tracking-widest uppercase text-sky-400 block mb-2">
+                Navigation
               </span>
-              <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+              <ul className="grid grid-cols-2 gap-2 text-xs font-mono">
                 {NAV_ITEMS.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => handleNavClick(item.id)}
-                    aria-label={`Scroll to ${item.label} section`}
-                    className="text-left text-slate-300 hover:text-sky-300 transition-colors py-1"
-                  >
-                    {item.label}
-                  </button>
+                  <li key={item.id}>
+                    <button
+                      onClick={() => handleNavClick(item.id)}
+                      className="text-slate-400 hover:text-sky-300 transition-colors text-left"
+                    >
+                      {item.label}
+                    </button>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
 
-            {/* Channels & Back to Top */}
-            <div className="md:col-span-3 flex flex-col justify-between items-start md:items-end space-y-6">
-              <div className="space-y-3 md:text-right">
-                <span className="block text-[10px] font-mono tracking-widest uppercase text-sky-400">
-                  Direct Channels
-                </span>
-                <div className="flex items-center gap-3">
-                  <a
-                    href={PERSONAL_INFO.socials.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Visit Muhammad Aqdas on GitHub"
-                    className="p-2 rounded-lg bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-transform"
-                  >
-                    <GithubIcon aria-hidden="true" className="w-4 h-4" />
-                  </a>
-                  <a
-                    href={PERSONAL_INFO.socials.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Visit Muhammad Aqdas on LinkedIn"
-                    className="p-2 rounded-lg bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-transform"
-                  >
-                    <LinkedinIcon aria-hidden="true" className="w-4 h-4" />
-                  </a>
-                  <a
-                    href={PERSONAL_INFO.socials.twitter}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Visit Muhammad Aqdas on Twitter / X"
-                    className="p-2 rounded-lg bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-transform"
-                  >
-                    <TwitterXIcon aria-hidden="true" className="w-4 h-4" />
-                  </a>
-                  <a
-                    href={`mailto:${PERSONAL_INFO.email}`}
-                    aria-label="Email Muhammad Aqdas"
-                    className="p-2 rounded-lg bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-transform"
-                  >
-                    <Mail aria-hidden="true" className="w-4 h-4" />
-                  </a>
-                </div>
+            {/* Col 3: Direct Connect & Socials (GitHub, LinkedIn, Email; NO Twitter, NO phone) */}
+            <div className="md:col-span-3 space-y-4">
+              <span className="text-[10px] font-mono tracking-widest uppercase text-sky-400 block mb-2">
+                Connect
+              </span>
+              <div className="flex items-center gap-2.5">
+                <a
+                  href={PERSONAL_INFO.socials.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Visit Muhammad Aqdas on GitHub"
+                  className="p-2 rounded-lg bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-transform"
+                >
+                  <GithubIcon aria-hidden="true" className="w-4 h-4" />
+                </a>
+                <a
+                  href={PERSONAL_INFO.socials.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Visit Muhammad Aqdas on LinkedIn"
+                  className="p-2 rounded-lg bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-transform"
+                >
+                  <LinkedinIcon aria-hidden="true" className="w-4 h-4" />
+                </a>
+                <a
+                  href={`mailto:${PERSONAL_INFO.email}`}
+                  aria-label="Email Muhammad Aqdas"
+                  className="p-2 rounded-lg bg-slate-900 border border-sky-400/20 text-slate-300 hover:text-sky-300 hover:border-sky-400/50 hover:-translate-y-1 transition-transform"
+                >
+                  <Mail aria-hidden="true" className="w-4 h-4" />
+                </a>
               </div>
-
-              {/* Scroll to top action */}
-              <button
-                onClick={handleScrollToTop}
-                aria-label="Back to top of page"
-                className="inline-flex items-center gap-2 text-xs font-mono text-sky-300 hover:text-white transition-colors group/top py-1"
-              >
-                <span>Back to top</span>
-                <ArrowUp aria-hidden="true" className="w-3.5 h-3.5 transition-transform group-hover/top:-translate-y-0.5" />
-              </button>
             </div>
           </div>
 
-          {/* Bottom Bar: Copyright & Specs */}
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-400">
-            <p>
-              © 2026 {PERSONAL_INFO.name}. Built with Next.js, R3F, GSAP & Tailwind.
-            </p>
-            <p className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span>All systems operational // 60 FPS</span>
-            </p>
+          {/* Bottom Copyright Bar (NO 60 FPS line) */}
+          <div className="pt-8 border-t border-sky-400/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-400">
+            <div>
+              <span>© 2026 Muhammad Aqdas. Built with Next.js, React Three Fiber, GSAP &amp; Tailwind CSS.</span>
+            </div>
+
+            <div className="text-sky-400/80">
+              <span>All rights reserved.</span>
+            </div>
           </div>
         </Container>
       </footer>

@@ -1,43 +1,103 @@
+export type SkillLevel = 'Comfortable' | 'Learning' | 'Exploring'
+
 export interface SkillCategory {
   category: string
   skills: {
     name: string
-    level: string
+    level: SkillLevel
     description: string
   }[]
 }
 
 export const SKILLS_DATA: SkillCategory[] = [
   {
-    category: 'Core Frontend',
+    category: 'Core',
     skills: [
-      { name: 'TypeScript', level: 'Advanced', description: 'Type-safe scalable architectures and strictly typed APIs' },
-      { name: 'React 19 & Next.js', level: 'Advanced', description: 'App Router, Server Components, and streaming rendering' },
-      { name: 'Tailwind CSS', level: 'Advanced', description: 'Utility-first modern styling, responsive layouts, design systems' },
+      {
+        name: 'HTML & CSS',
+        level: 'Comfortable',
+        description: 'Semantic page structure, modern flexbox and grid layouts, and media queries.',
+      },
+      {
+        name: 'JavaScript',
+        level: 'Learning',
+        description: 'Modern ES6+ syntax, asynchronous programming, promises, and DOM manipulation.',
+      },
+      {
+        name: 'TypeScript',
+        level: 'Learning',
+        description: 'Adding types to components, interfaces, and catching errors early in development.',
+      },
+      {
+        name: 'React',
+        level: 'Learning',
+        description: 'Building components, managing state with hooks, and handling user events.',
+      },
+      {
+        name: 'Next.js',
+        level: 'Learning',
+        description: 'App Router fundamentals, page routing, and combining client and server components.',
+      },
+      {
+        name: 'Tailwind CSS',
+        level: 'Comfortable',
+        description: 'Styling interfaces rapidly with utility classes and responsive modifiers.',
+      },
     ],
   },
   {
-    category: '3D & Creative Web',
+    category: 'Animation',
     skills: [
-      { name: 'Three.js', level: 'Intermediate / Advanced', description: 'Procedural meshes, scene lighting, shaders, and materials' },
-      { name: 'React Three Fiber & Drei', level: 'Intermediate / Advanced', description: 'Declarative 3D scenes, camera choreography, and canvas state' },
-      { name: 'WebGL & GLSL', level: 'Foundational', description: 'Custom vertex and fragment shader manipulations' },
+      {
+        name: 'GSAP & ScrollTrigger',
+        level: 'Exploring',
+        description: 'Creating scroll-driven triggers, sequencing animations, and scrubbed transitions.',
+      },
+      {
+        name: 'Motion',
+        level: 'Exploring',
+        description: 'Adding smooth spring animations, fade-ins, and hover micro-interactions.',
+      },
+      {
+        name: 'Lenis',
+        level: 'Exploring',
+        description: 'Integrating smooth momentum scrolling with animation triggers.',
+      },
     ],
   },
   {
-    category: 'Animation & Interaction',
+    category: '3D Graphics',
     skills: [
-      { name: 'GSAP & ScrollTrigger', level: 'Advanced', description: 'High-precision timeline sequencing and scrub-driven choreography' },
-      { name: 'Motion / Framer Motion', level: 'Advanced', description: 'Spring physics, layout animations, and gesture interactions' },
-      { name: 'Lenis', level: 'Advanced', description: 'Momentum smooth scrolling and animation sync' },
+      {
+        name: 'Three.js & React Three Fiber',
+        level: 'Exploring',
+        description: 'Setting up 3D scenes, cameras, lighting, materials, and procedural geometry.',
+      },
+      {
+        name: 'GLSL shaders',
+        level: 'Exploring',
+        description: 'Experimenting with basic vertex and fragment shader mathematics.',
+      },
     ],
   },
   {
-    category: 'Performance & Engineering',
+    category: 'Tools & Practices',
     skills: [
-      { name: 'Web Performance Optimization', level: 'Advanced', description: 'Lighthouse scoring, asset compression, dynamic importing' },
-      { name: 'Responsive & Accessible Design', level: 'Advanced', description: 'Mobile-first fluid layouts, reduced-motion compliance' },
-      { name: 'Git & Modern Tooling', level: 'Advanced', description: 'Turbopack, ESLint, modern package management' },
+      {
+        name: 'Git & GitHub',
+        level: 'Learning',
+        description: 'Tracking code changes, branch workflows, and committing project history.',
+      },
+      {
+        name: 'Responsive & accessible design',
+        level: 'Learning',
+        description: 'Building layouts that work on all screen sizes with accessible ARIA tags.',
+      },
+      {
+        name: 'VS Code & Vercel',
+        level: 'Comfortable',
+        description: 'Daily code editing, developer extensions, and continuous deployment workflows.',
+      },
     ],
   },
 ]

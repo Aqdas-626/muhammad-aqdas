@@ -86,9 +86,9 @@ export function Preloader() {
             </div>
 
             <div className="space-y-2 mb-10">
-              <h2 className="text-sm font-mono tracking-[0.3em] uppercase text-sky-400">
+              <p className="text-sm font-mono tracking-[0.3em] uppercase text-sky-400 font-semibold">
                 MUHAMMAD AQDAS
-              </h2>
+              </p>
               <p className="text-xs text-slate-300 font-mono tracking-[0.2em] uppercase">
                 Initializing Arctic Space
               </p>

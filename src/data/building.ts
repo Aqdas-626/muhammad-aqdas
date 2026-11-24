@@ -1,39 +1,42 @@
-export interface BuildingItem {
+export interface LearningTopic {
   id: string
   title: string
   category: string
-  status: 'In Progress' | 'Experimenting' | 'Deep Dive'
-  description: string
-  techStack: string[]
-  progress: number
+  sentence: string
+  tags: string[]
 }
 
-export const BUILDING_DATA: BuildingItem[] = [
+export const CURRENTLY_LEARNING_TOPICS: LearningTopic[] = [
   {
-    id: 'glsl-shaders',
-    title: 'Custom WebGL Shaders & GLSL Math',
-    category: 'Creative Graphics',
-    status: 'Deep Dive',
-    description: 'Experimenting with procedural Simplex/Voronoi noise, vertex distortion matrices, and real-time raymarching for browser-based atmospheric simulations.',
-    techStack: ['GLSL', 'Three.js', 'WebGL', 'Math'],
-    progress: 75,
+    id: 'threejs-r3f',
+    title: 'Three.js & React Three Fiber',
+    category: '3D Graphics',
+    sentence:
+      'Practising how to set up procedural geometries, lighting, camera controls, and smooth canvas integration in React.',
+    tags: ['Three.js', 'R3F', 'Canvas'],
   },
   {
-    id: 'next16-concurrent',
-    title: 'Next.js 16 & React 19 Architectures',
-    category: 'Modern Web Core',
-    status: 'In Progress',
-    description: 'Exploring Server Actions, streaming component suspense, Partial Prerendering (PPR), and high-throughput Turbopack development workflows.',
-    techStack: ['Next.js 16', 'React 19', 'TypeScript', 'Turbopack'],
-    progress: 85,
+    id: 'nextjs-app-router',
+    title: 'Next.js App Router',
+    category: 'Web Framework',
+    sentence:
+      'Practising component architecture, separating client and server components, and optimizing production builds.',
+    tags: ['Next.js', 'React', 'TypeScript'],
   },
   {
-    id: 'spatial-physics',
-    title: 'Spatial Audio & Physics Interactions',
-    category: 'Sensory Web',
-    status: 'Experimenting',
-    description: 'Integrating lightweight physics engines (Rapier3D) and Web Audio API spatial listeners to bring tactile soundscapes to 3D canvas viewports.',
-    techStack: ['Rapier3D', 'Web Audio API', 'React Three Fiber'],
-    progress: 60,
+    id: 'typescript',
+    title: 'TypeScript',
+    category: 'Language',
+    sentence:
+      'Practising static typing with interfaces, generic props, and strict types to catch bugs early in development.',
+    tags: ['TypeScript', 'Static Typing'],
+  },
+  {
+    id: 'gsap-animations',
+    title: 'GSAP animations',
+    category: 'Animation',
+    sentence:
+      'Practising timeline sequencing, scroll triggers, and coordinating animation lifecycles with the DOM.',
+    tags: ['GSAP', 'ScrollTrigger', 'Motion'],
   },
 ]

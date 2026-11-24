@@ -1,32 +1,27 @@
-export interface ExperienceMilestone {
-  period: string
+export interface LearningMilestone {
+  // TODO: Replace [YEAR] with your actual starting year (e.g. '2024' or '2025')
+  year: string
   title: string
-  area: string
   description: string
-  highlights: string[]
 }
 
-export const EXPERIENCE_DATA: ExperienceMilestone[] = [
+export const LEARNING_JOURNEY_DATA: LearningMilestone[] = [
   {
-    period: '2025 - Present',
-    title: 'Independent Frontend & Creative Developer',
-    area: 'Self-Directed Engineering & Exploration',
-    description: 'Focusing on cutting-edge creative web development, modern Next.js architectures, declarative 3D graphics (React Three Fiber), and complex scroll-linked micro-interactions.',
-    highlights: [
-      'Engineered procedural 3D web environments with real-time lighting and camera choreography',
-      'Architected responsive, accessible component ecosystems using React 19, TypeScript, and Tailwind CSS',
-      'Specialized in smooth-scroll mechanics and timeline orchestration with Lenis, GSAP, and Motion',
-    ],
+    // TODO: Replace [YEAR] with the year you started learning HTML, CSS & JavaScript
+    year: '[YEAR]',
+    title: 'Web Fundamentals',
+    description: 'Started learning HTML, CSS and JavaScript fundamentals.',
   },
   {
-    period: '2024 - 2025',
-    title: 'Modern Web & JavaScript Deep Dive',
-    area: 'Frontend Specialization',
-    description: 'Intensive focus on TypeScript fundamentals, component design patterns, state management, and modern CSS layout techniques.',
-    highlights: [
-      'Built interactive web applications adhering to strict accessibility and semantic standards',
-      'Studied WebGL fundamentals, matrix transformations, and 3D coordinate spaces',
-      'Developed reusable UI utility libraries focusing on layout stability and performance',
-    ],
+    // TODO: Replace [YEAR] with the year you moved to React & Next.js
+    year: '[YEAR]',
+    title: 'React & Component Architecture',
+    description: 'Moved on to React and Next.js; built small practice components.',
+  },
+  {
+    // TODO: Replace [YEAR] with the year you built this portfolio
+    year: '[YEAR]',
+    title: 'First Full Project',
+    description: 'Built my first full project, this 3D portfolio.',
   },
 ]

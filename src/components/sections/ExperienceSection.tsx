@@ -3,11 +3,11 @@
 import React, { useEffect, useRef } from 'react'
 import { motion } from 'motion/react'
 import { gsap } from '@/lib/gsap'
-import { EXPERIENCE_DATA } from '@/data/experience'
+import { LEARNING_JOURNEY_DATA } from '@/data/experience'
 import { Container } from '@/components/ui/Container'
 import { RevealLines } from '@/components/motion/RevealLines'
 import { CardSpotlight } from '@/components/ui/CardSpotlight'
-import { Calendar, CheckCircle2 } from 'lucide-react'
+import { Calendar } from 'lucide-react'
 
 export function ExperienceSection() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -22,7 +22,7 @@ export function ExperienceSection() {
 
     const initAnimation = () => {
       ctx = gsap.context(() => {
-        // 1. Timeline line scaleY scrub
+        // 1. Timeline vertical line scaleY scrub
         if (timelineLineRef.current) {
           gsap.fromTo(
             timelineLineRef.current,
@@ -59,7 +59,6 @@ export function ExperienceSection() {
               },
             })
           } else {
-            // Slide in from alternate sides on desktop (x: -40 for left, 40 for right)
             const startX = isDesktop ? (isOdd ? -40 : 40) : 30
 
             const tl = gsap.timeline({
@@ -127,97 +126,87 @@ export function ExperienceSection() {
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] as const }}
           className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-950/40 border border-sky-400/20 backdrop-blur-md mb-6"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shadow-[0_0_6px_#38bdf8]" />
+          <Calendar aria-hidden="true" className="w-3.5 h-3.5 text-sky-400" />
           <span className="text-[11px] font-mono tracking-widest uppercase text-sky-300">
-            05 // Experience & Evolution
+            05 // Learning Journey
           </span>
         </motion.div>
 
-        {/* Section Header */}
-        <div className="max-w-2xl mb-16">
+        {/* Section Header (H2) */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-20">
           <RevealLines
             as="h2"
             delay={0.1}
             className="text-3xl sm:text-5xl font-light tracking-tight text-white leading-tight"
             lines={[
-              'Engineering path &',
+              'Learning',
               <span key="1">
                 <span className="bg-gradient-to-r from-sky-200 via-cyan-100 to-white bg-clip-text text-transparent font-normal">
-                  technical milestones.
+                  journey.
                 </span>
               </span>,
             ]}
           />
-          <p className="mt-4 text-xs sm:text-sm text-slate-400 font-mono tracking-wide">
-            An honest chronology of self-directed technical mastery, architectural exploration, and frontend craft.
-          </p>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] as const }}
+            className="text-xs sm:text-sm text-slate-400 font-mono tracking-wide max-w-sm"
+          >
+            A timeline of how I started and what I have learned so far.
+          </motion.p>
         </div>
 
         {/* Timeline Container */}
-        <div className="timeline-container relative pl-8 md:pl-0 space-y-12 sm:space-y-16">
-          {/* Static Track Line */}
-          <div className="absolute left-3.5 md:left-1/2 md:-translate-x-1/2 top-4 bottom-4 w-[2px] bg-slate-800/80 rounded-full" />
-
-          {/* Animated Scroll-Filling Progress Line */}
+        <div className="timeline-container relative max-w-4xl mx-auto">
+          {/* Vertical scrubbed guide line */}
           <div
             ref={timelineLineRef}
-            className="absolute left-3.5 md:left-1/2 md:-translate-x-1/2 top-4 bottom-4 w-[2px] bg-gradient-to-b from-sky-400 via-cyan-300 to-white origin-top shadow-[0_0_12px_rgba(56,189,248,0.8)] rounded-full will-change-transform"
+            className="absolute left-4 md:left-1/2 top-4 bottom-4 w-px bg-gradient-to-b from-sky-400/60 via-cyan-400/30 to-sky-400/0 origin-top -translate-x-1/2 pointer-events-none"
           />
 
-          {/* Timeline Milestones (Desktop: alternating left / right; Mobile: single column) */}
-          {EXPERIENCE_DATA.map((item, idx) => {
-            const isOdd = idx % 2 === 0
-
-            return (
-              <div
-                key={idx}
-                className={`timeline-item relative flex flex-col md:flex-row items-center w-full ${
-                  isOdd ? 'md:justify-start' : 'md:justify-end'
-                }`}
-              >
-                {/* Node dot on the timeline */}
-                <div className="timeline-node-dot absolute -left-[27px] md:left-1/2 md:-translate-x-1/2 top-6 w-4 h-4 rounded-full bg-slate-950 border-2 border-sky-400 transition-all duration-500 flex items-center justify-center z-10">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
-                </div>
-
-                {/* Milestone Card */}
+          <div className="space-y-12">
+            {LEARNING_JOURNEY_DATA.map((milestone, idx) => {
+              const isOdd = idx % 2 === 0
+              return (
                 <div
-                  className={`timeline-card w-full md:w-[calc(50%-2rem)] ${
-                    isOdd ? 'md:pr-4' : 'md:pl-4'
+                  key={idx}
+                  className={`timeline-item relative flex flex-col md:flex-row items-start ${
+                    isOdd ? 'md:flex-row-reverse' : ''
                   }`}
                 >
-                  <CardSpotlight className="p-7 sm:p-8 rounded-2xl bg-slate-950/50 border border-sky-400/15 backdrop-blur-xl hover:border-sky-400/40 transition-all duration-300 shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
-                    {/* Period badge */}
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-400/25 text-[10px] font-mono text-sky-300 mb-4">
-                      <Calendar aria-hidden="true" className="w-3 h-3 text-sky-400" />
-                      <span>{item.period}</span>
-                    </div>
+                  {/* Central Node Dot */}
+                  <div className="timeline-node-dot absolute left-4 md:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-slate-900 border-2 border-sky-400/60 transition-all duration-500 z-10 top-6" />
 
-                    <h3 className="text-xl sm:text-2xl font-light text-white tracking-tight">
-                      {item.title}
-                    </h3>
-                    <h4 className="text-sm font-mono text-sky-400 mb-4">
-                      {item.area}
-                    </h4>
+                  {/* Card Content Column */}
+                  <div
+                    className={`timeline-card w-full pl-12 md:pl-0 ${
+                      isOdd ? 'md:pr-14 md:text-right' : 'md:pl-14 md:text-left'
+                    } md:w-1/2`}
+                  >
+                    <CardSpotlight className="p-6 sm:p-7 rounded-2xl bg-slate-950/50 border border-sky-400/15 backdrop-blur-xl hover:border-sky-400/40 transition-colors">
+                      <div
+                        className={`inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-950/40 border border-sky-400/20 text-[11px] font-mono text-sky-300 mb-3`}
+                      >
+                        <Calendar aria-hidden="true" className="w-3 h-3 text-sky-400" />
+                        <span>{milestone.year}</span>
+                      </div>
 
-                    <p className="text-xs sm:text-sm text-slate-300 font-light leading-relaxed mb-6">
-                      {item.description}
-                    </p>
+                      <h3 className="text-lg sm:text-xl font-medium text-white mb-2">
+                        {milestone.title}
+                      </h3>
 
-                    {/* Highlights bullets */}
-                    <div className="space-y-2">
-                      {item.highlights.map((bullet, bIdx) => (
-                        <div key={bIdx} className="flex items-start gap-2.5 text-xs text-slate-300 font-light">
-                          <CheckCircle2 aria-hidden="true" className="w-3.5 h-3.5 text-sky-400 shrink-0 mt-0.5" />
-                          <span>{bullet}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardSpotlight>
+                      <p className="text-xs sm:text-sm text-slate-300 font-light leading-relaxed">
+                        {milestone.description}
+                      </p>
+                    </CardSpotlight>
+                  </div>
                 </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
       </Container>
     </section>

@@ -6,7 +6,8 @@ import { gsap } from '@/lib/gsap'
 import { useSmoothScroll } from '@/providers/SmoothScrollProvider'
 import { Container } from '@/components/ui/Container'
 import { Magnetic } from '@/components/motion/Magnetic'
-import { Sparkles } from 'lucide-react'
+import { FileText } from 'lucide-react'
+import { PERSONAL_INFO } from '@/data/constants'
 
 export function HeroSection() {
   const { scrollTo } = useSmoothScroll()
@@ -139,18 +140,18 @@ export function HeroSection() {
             animate="visible"
             className="w-full text-center flex flex-col items-center pointer-events-auto"
           >
-            {/* Arctic status pill */}
+            {/* Honest Status Pill */}
             <motion.div
               variants={itemVariants}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/60 border border-sky-400/20 backdrop-blur-md mb-8 shadow-[0_0_20px_rgba(56,189,248,0.15)]"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/60 border border-sky-400/20 backdrop-blur-md mb-8 shadow-[0_0_20px_rgba(56,189,248,0.15)]"
             >
-              <Sparkles aria-hidden="true" className="w-3.5 h-3.5 text-sky-400" />
+              <span className="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_8px_#38bdf8]" />
               <span className="text-[11px] font-mono tracking-widest uppercase text-sky-200">
-                Creative Web & 3D Engineering
+                {PERSONAL_INFO.eyebrow}
               </span>
             </motion.div>
 
-            {/* Hero Name: Fully painted in initial HTML as LCP element with accessible aria-label */}
+            {/* Hero Name: Single H1 on page, fully painted in initial HTML as LCP element */}
             <motion.div variants={itemVariants} className="overflow-hidden">
               <h1
                 aria-label="Muhammad Aqdas"
@@ -173,17 +174,17 @@ export function HeroSection() {
 
             {/* Role subtitle */}
             <motion.div variants={itemVariants} className="mt-4 sm:mt-6">
-              <h2 className="text-lg sm:text-2xl font-mono tracking-[0.25em] text-sky-400 uppercase font-light">
-                Frontend Developer
-              </h2>
+              <p className="text-lg sm:text-2xl font-mono tracking-[0.2em] text-sky-400 uppercase font-light">
+                {PERSONAL_INFO.subtitle}
+              </p>
             </motion.div>
 
-            {/* Tagline */}
+            {/* Honest Intro Text */}
             <motion.p
               variants={itemVariants}
-              className="mt-6 max-w-xl text-sm sm:text-base md:text-lg text-slate-300 font-light leading-relaxed tracking-wide"
+              className="mt-6 max-w-2xl text-sm sm:text-base md:text-lg text-slate-300 font-light leading-relaxed tracking-wide"
             >
-              Crafting fluid digital experiences, interactive web graphics, and modern frontend architectures in a cold, precision-tuned space.
+              {PERSONAL_INFO.heroText}
             </motion.p>
 
             {/* Interactive Call to Actions */}
@@ -195,21 +196,34 @@ export function HeroSection() {
                 <Magnetic strength={0.3}>
                   <button
                     onClick={() => handleScrollTo('work')}
-                    aria-label="View featured work section"
+                    aria-label="View my work"
                     className="group relative px-7 py-3.5 rounded-full text-xs sm:text-sm font-mono tracking-widest text-slate-950 font-semibold bg-gradient-to-r from-sky-300 via-cyan-200 to-white hover:from-white hover:to-sky-300 transition-transform duration-300 shadow-[0_0_25px_rgba(56,189,248,0.4)] hover:scale-105 active:scale-95"
                   >
-                    <span>VIEW WORK</span>
+                    <span>View my work</span>
                   </button>
                 </Magnetic>
 
                 <Magnetic strength={0.3}>
                   <button
                     onClick={() => handleScrollTo('contact')}
-                    aria-label="Contact Muhammad Aqdas"
+                    aria-label="Get in touch with Muhammad Aqdas"
                     className="px-7 py-3.5 rounded-full text-xs sm:text-sm font-mono tracking-widest text-slate-200 font-medium bg-slate-950/50 border border-sky-400/25 hover:border-sky-400/70 hover:bg-sky-500/10 transition-transform duration-300 backdrop-blur-md shadow-[0_0_20px_rgba(0,0,0,0.5)] hover:scale-105 active:scale-95"
                   >
-                    <span>CONTACT ME</span>
+                    <span>Get in touch</span>
                   </button>
+                </Magnetic>
+
+                <Magnetic strength={0.3}>
+                  <a
+                    href={PERSONAL_INFO.resumeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Download or view resume PDF"
+                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full text-xs sm:text-sm font-mono tracking-widest text-sky-300 font-medium bg-slate-950/30 border border-sky-400/20 hover:border-sky-400/50 hover:bg-sky-500/10 transition-transform duration-300 backdrop-blur-md hover:scale-105 active:scale-95"
+                  >
+                    <FileText aria-hidden="true" className="w-4 h-4 text-sky-400" />
+                    <span>Resume</span>
+                  </a>
                 </Magnetic>
               </div>
             </motion.div>

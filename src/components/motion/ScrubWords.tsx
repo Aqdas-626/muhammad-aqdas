@@ -97,23 +97,25 @@ export function ScrubWords({
     }
   }, [mounted, words.length, start, end])
 
+  const Component = Tag as React.ElementType
+
   // SSR and pre-mount render: plain deterministic text
   if (!mounted) {
     return (
-      <Tag
-        ref={containerRef as any}
+      <Component
+        ref={containerRef}
         aria-label={content}
         className={`relative block leading-relaxed ${className}`}
       >
         {content}
-      </Tag>
+      </Component>
     )
   }
 
   // Client mounted render: split words for GSAP scrubbed opacity with accessible label
   return (
-    <Tag
-      ref={containerRef as any}
+    <Component
+      ref={containerRef}
       aria-label={content}
       className={`relative block leading-relaxed ${className}`}
     >
@@ -127,6 +129,6 @@ export function ScrubWords({
           </React.Fragment>
         ))}
       </span>
-    </Tag>
+    </Component>
   )
 }

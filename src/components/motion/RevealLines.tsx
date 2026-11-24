@@ -166,12 +166,13 @@ export function RevealLines({
   }
 
   const effectiveAriaLabel = ariaLabel || (textFallback ? textFallback : undefined)
+  const Component = Tag as React.ElementType
 
   // SSR & Pre-mount: Render semantic un-nested lines (zero hydration diff & instant LCP)
   if (!mounted) {
     return (
-      <Tag
-        ref={containerRef as any}
+      <Component
+        ref={containerRef}
         aria-label={effectiveAriaLabel}
         className={`relative block ${className}`}
       >
@@ -180,14 +181,14 @@ export function RevealLines({
             {item}
           </span>
         ))}
-      </Tag>
+      </Component>
     )
   }
 
   // Mounted client render: Lines wrapped in overflow-hidden masks
   return (
-    <Tag
-      ref={containerRef as any}
+    <Component
+      ref={containerRef}
       aria-label={effectiveAriaLabel}
       className={`relative block ${className}`}
     >
@@ -202,6 +203,6 @@ export function RevealLines({
           </span>
         </span>
       ))}
-    </Tag>
+    </Component>
   )
 }
